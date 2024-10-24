@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="stylesheet" href="../static/survey.css">
+        <title>Form</title>
+
+    <script>
+        const locations = [
+            "ARENA BLANCO", "AYALA", "BALIWASAN", "BALUNO", "BASILAN",
+            "BOALAN", "BOLONG", "BUNGUIAO", "BUSAY", "CABALUAY",
+            "CABATANGAN", "CALARIAN", "CAMINO NUEVO", "CAMPO ISLAM",
+            "CANELAR", "CAWIT", "CULIANAN", "CURUAN", "DIVISORIA",
+            "GOV. CAMINS", "GOV. LIM", "GOV. RAMOS", "GUISAO",
+            "GUIWAN", "SULU", "KASANYANGAN", "LA PAZ", "LABUAN",
+            "LAMISAHAN", "LANDANG GUA", "LANDANG LAUM", "LAPAKAN",
+            "LIMPAPA", "LUBIGAN", "LUMBANGAN", "LUNZURAN", "MAASIN",
+            "MALAGUTAY", "MAMPANG", "MANALIPA", "MANGUSU", "MANICAHAN",
+            "MARIKI", "MERCEDES", "NUÑEZ EXTENSION", "PAGADIAN CITY",
+            "PAMUCUTAN", "PASOBOLONG", "PASONANCA", "PATALON", "PUTIK",
+            "RECODO", "RIO HONDO", "SACOL ISLAND", "SALAAN",
+            "SAN JOSE CAWA-CAWA", "SAN JOSE GUSU", "SAN ROQUE-ZC",
+            "SANGALI", "SINUBONG", "SINUNUC", "STA. BARBARA",
+            "STA. CATALINA", "STA. MARIA", "STO. NIÑO", "TAGASILAY",
+            "TAGUITI", "TALABAAN", "TALISAYAN", "TALON-TALON",
+            "TALUKSANGAY", "TAWI-TAWI", "TETUAN", "TIGTABON",
+            "TUGBUNGAN", "TULUNGATUNG", "TUMAGA", "TUMATULAB",
+            "VETERANS AVENUE", "VICTORIA", "VITALI", "ZAMBOWOOD",
+            "ZAMBOANGA DEL NORTE", "ZONE 1", "ZONE 2", "ZONE 3",
+            "ZONE 4", "ABUNO", "ACMAC", "BAGONG SILANG", "BONBONON",
+            "BURU-UN", "DALIPUGA", "DEL CARMEN", "DITUCALAN",
+            "HINAPLANON", "KALILANGAN", "KIWALAN", "LUINAB",
+            "MA. CRISTINA", "MAHAYAHAY", "MARAWI CITY", "PALA-O",
+            "POBLACION", "PUGA-AN", "SAN MIGUEL", "SAN ROQUE-IC",
+            "SANTIAGO", "SARAY", "STA. ELENA", "STA. FILOMENA",
+            "STO. ROSARIO", "SUAREZ", "TAMBACAN", "TIBANGA",
+            "TIPANOY", "TOMAS CABILI", "TOMINOBO", "TUBOD",
+            "UBALDO LAYA", "UPPER HINAPLANON", "VILLA VERDE",
+            "LANAO DEL SUR", "LANAO DEL NORTE", "MIS. ORIENTAL",
+            "MIS. OCCIDENTAL", "ZAMBOANGA SIBUGAY", "CAGAYAN DE ORO CITY",
+            "ZAMBOANGA DEL SUR", "ROGONGON", "MANDULOG", "TAMBO",
+            "RONGONGON", "MUTI", "PANUBIGAN", "DIKILAAN",
+            "CACAO", "LANSONES", "KABACSANAN"
+        ];
+    
+        let existingNames = [];
+        let globalNames = [];
+            function autocomplete(input, suggestions, fetchDetails) {
+                input.addEventListener("input", function() {
+                    const value = this.value;
+                    closeAllLists();
+                    if (!value) return;
+    
+                    const suggestionBox = document.createElement("div");
+                    suggestionBox.setAttribute("class", "autocomplete-suggestions");
+                    this.parentNode.appendChild(suggestionBox);
+    
+                    suggestions.forEach(item => {
+                        if (item.toLowerCase().includes(value.toLowerCase())) {
+                            const suggestionItem = document.createElement("div");
+                            suggestionItem.innerHTML = item;
+                            suggestionItem.classList.add("autocomplete-suggestion");
+                            suggestionItem.addEventListener("click", function() {
+                                input.value = this.innerHTML;
+                                closeAllLists();
+                                fetchDetails(this.innerHTML);
+                                fetchCustomerDetails(this.innerHTML); // For existing names
+                                fetchCustomerInfo(this.innerHTML); 
+                            });
+                            suggestionBox.appendChild(suggestionItem);
+                        }
+                    });
+                });
+            }
+                function closeAllLists() {
+                    const items = document.querySelectorAll(".autocomplete-suggestions");
+                    items.forEach(item => item.parentNode.removeChild(item));
+                }
+    
+        function fetchCustomerDetails(name) {
+        fetch('/check_name', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: name })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data && data.customerType === 'existing') {
+                // Populate fields with the retrieved data
+                document.getElementById('age').value = data.age;
+                document.getElementById('birthday').value = data.birthday;
+                document.getElementById('occupation').value = data.occupation;
+                document.getElementById('incomeSource').value = data.incomeSource;
+                document.getElementById('address').value = data.address;
+                document.getElementById('firstTransaction').value = data.firstTransaction
+               
+                document.querySelector('input[name="customerType"][value="existing"]').checked = true;
+                
+            } else {
+                clearFields();  // Handle case where no customer is found
+            }
+        })
+        .catch(error => console.error('Error fetching customer details:', error));
+    }
+    
+    
+    function fetchCustomerInfo(name) {
+        console.log("Fetching customer info for:", name); // Log the name
+    
+        fetch('/get_customer_info', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name })
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error('Network response was not ok: ' + response.statusText + ' - ' + text);
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data && Object.keys(data).length > 0) {
+                document.getElementById('branches').value = data.Branch || '';
+                document.getElementById('work').value = data.Customer_work || '';
+                document.getElementById('addressed').value = data.Address || '';
+                fetchCustomerTransactions(name);
+            } else {
+                clearFields();
+                console.log("No customer data found.");
+            }
+        })
+        .catch(error => console.error('Error fetching customer info:', error));
+    }
+    
+    function fetchCustomerTransactions(name) {
+        fetch('/get_customer_transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const transactionsContainer = document.getElementById('branchTransactions').getElementsByTagName('tbody')[0];
+            transactionsContainer.innerHTML = ''; // Clear previous rows
+    
+            if (data && !data.message) {
+                data.forEach(transaction => {
+                    const row = transactionsContainer.insertRow();
+                    const branchCell = row.insertCell(0);
+                    const loanDateCell = row.insertCell(1);
+    
+                    branchCell.textContent = transaction.Branch;
+                    loanDateCell.textContent = transaction.LoanDate;
+                });
+            } else {
+                const row = transactionsContainer.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 2;
+                cell.textContent = data.message || "No transactions available.";
+            }
+        })
+        .catch(error => console.error('Error fetching transactions:', error));
+    }
+    
+    function displayTransactions(transactions) {
+        const transactionsContainer = document.getElementById('branchTransactions');
+        transactionsContainer.innerHTML = '';
+    
+        transactions.forEach(transaction => {
+            const transactionElement = document.createElement('div');
+            transactionElement.innerHTML = `
+                <p>Branch: ${transaction.Branch}</p>
+                <p>Loan Date: ${transaction.LoanDate}</p>
+                <hr>
+            `;
+            transactionsContainer.appendChild(transactionElement);
+        });
+    }
+    function clearDates() {
+        document.getElementById('loan').value = ''; // Clear Loan Date
+        document.getElementById('firstTransaction').value = ''; // Clear First Transaction
+    }
+            function clearFields() {
+                document.getElementById('birthday').value = '';
+                document.getElementById('age').value = '';
+                document.getElementById('occupation').value = '';
+                document.getElementById('incomeSource').value = '';
+                document.getElementById('address').value = '';
+                document.getElementById('firstTransaction').value = '';
+                document.querySelector('input[name="customerType"][value="new customer"]').checked = true;
+            }
+    
+            window.onload = function() {
+             const username = '{{ session.username }}';
+             fetch('/get_existing_names')
+            .then(resp => resp.json())
+            .then(data => {
+                existingNames.push(...data.names);
+                const anotherSearchInput = document.getElementById("name");
+                autocomplete(anotherSearchInput, existingNames, fetchCustomerDetails);
+            })
+            .catch(error => console.error('Error fetching names:', error));
+            
+    
+            fetch('/get_global_names')
+            .then(resp => resp.json())
+            .then(data => {
+                globalNames.push(...data.names);
+                const SearchInputcustomer = document.getElementById("searchInput");
+                autocomplete(SearchInputcustomer, globalNames, fetchCustomerDetails);
+            })
+            .catch(error => console.error('Error fetching global names:', error));
+            
+            const anotherSearchInput = document.getElementById("name"); // Adjust this ID
+            autocomplete(anotherSearchInput, existingNames, fetchCustomerDetails); 
+    
+            const SearchInputcustomer = document.getElementById("searchInput"); 
+            autocomplete(document.getElementById("address"), locations, fetchCustomerInfo);
+    
+            const customerTypeRadios = document.querySelectorAll('input[name="customerType"]');
+            customerTypeRadios.forEach(radio => {
+            radio.addEventListener('change', handleCustomerTypeChange);
+            const customerInfo = localStorage.getItem('customerInfo');
+    if (customerInfo) {
+        const info = JSON.parse(customerInfo);
+        
+        // Populate the form fields with the customer information
+       
+        document.getElementById('name').value = info.name || '';
+        
+        // If necessary, set other fields like occupation, etc.
+    }
+        });
+        const today = new Date();
+        const minDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+        document.getElementById('birthday').max = minDate.toISOString().split("T")[0];
+    // Update the existing functions for loan and first transaction fields
+    document.getElementById('loan').addEventListener('change', function() {
+        syncDates('loan', 'firstTransaction'); // Sync Loan Date to First Transaction if applicable
+    });
+    
+    document.getElementById('firstTransaction').addEventListener('change', function() {
+        syncDates('firstTransaction', 'loan'); // Sync First Transaction to Loan Date if applicable
+    });
+    };
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+            function calculateAge() {
+                const birthdayInput = document.getElementById('birthday').value;
+                const ageInput = document.getElementById('age');
+    
+                if (birthdayInput) {
+                    const birthday = new Date(birthdayInput);
+                    const today = new Date();
+    
+                    let age = today.getFullYear() - birthday.getFullYear();
+                    const monthDifference = today.getMonth() - birthday.getMonth();
+    
+                    // Adjust age if the birthday hasn't occurred yet this year
+                    if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthday.getDate())) {
+                        age--;
+                    }
+    
+                    ageInput.value = age;
+                } else {
+                    ageInput.value = ''; 
+                }
+            }   
+         function checkCustomer() {
+                const nameInput = document.getElementById('name').value;
+    
+                if (nameInput) {
+                    fetch('/check_name', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ name: nameInput })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.birthday) {
+                            // Convert MM/DD/YYYY to YYYY-MM-DD
+                            const [month, day, year] = data.birthday.split('/');
+                            const formattedBirthday = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    
+                            // Set the birthday value to the input field
+                            document.getElementById('birthday').value = formattedBirthday; // Must be in YYYY-MM-DD format
+                            document.getElementById('age').value = data.age; 
+                            document.getElementById('occupation').value = data.occupation; 
+                            document.getElementById('incomeSource').value = data.incomeSource; 
+                            document.getElementById('firstTransaction').value = data.incomeSource; 
+                            // Check existing customer radio button
+                            document.querySelector('input[name="customerType"][value="existing"]').checked = true;
+                        } else {
+                            // Clear fields if no existing customer
+                            clearFields();
+                            document.querySelector('input[name="customerType"][value="new customer"]').checked = true; 
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            }
+            function handleCustomerTypeChange() {
+        const customerType = document.querySelector('input[name="customerType"]:checked').value;
+    
+        if (customerType === 'existing') {
+            clearDates(); // Optionally clear the dates when an existing customer is selected
+        }
+    }
+    
+            function syncDates(sourceId, targetId) {
+                 const sourceDate = document.getElementById(sourceId).value;
+                 const targetField = document.getElementById(targetId);
+                 
+          
+    
+        const customerType = document.querySelector('input[name="customerType"]:checked').value;
+      
+        // Only sync if the customer type is new
+        if (customerType === 'new customer') {
+            targetField.value = sourceDate; // Set the target date to the source date
+        }
+    }
+    
+        </script>
+        </head>
+        <body>
+            <form method="POST" action="/submit">
+                <h1>Customer Information Form</h1>
+                <div class="div1">
+                <label id="Label">Branch<input type="text" value="{{ branch }}" name="branch" placeholder="Branch" id="Branch" value="{{ customer_info.Name }}" required></label>
+                <label id ="Label">Name<input type="text" name="name" placeholder="Last Name, First Name Middle Initial" id="name" required></label>
+                <label id ="Label"><input type="radio" name="customerType" value="new customer" id="new customer" checked>New Customer</label>
+                <label id ="Label"><input type="radio" name="customerType" value="existing" id="existing"required>Existing Customer</label>
+                <label id ="Label">Age<input type="number" name="age" id="age" placeholder="Age" required min="18" max="100" readonly></label>
+                <label id ="Label">Loan Date (Date of Transaction)<input type="date" name="loan" id="loan" required></label>
+                <label id ="Label">Birthday: <input type="date" name="birthday" id="birthday" required onchange="calculateAge()"></label>
+                <label id ="Label">Address<input type="text" name="address" id="address" required></label>
+                <script>  function updateIncomeSource() {
+                    const occupation = document.getElementById('occupation').value;
+                    const incomeSource = document.getElementById('incomeSource');
+        
+                    // Set default value for income source
+                    let sourceValue = '';
+        
+                    // Determine the source of income based on the occupation
+                    switch (occupation) {
+                        case 'BUSINESS OWNER':
+                            sourceValue = 'BUSINESS INCOME';
+                            break;
+                        case 'HOUSEWIFE':
+                            sourceValue = 'DEPENDENT ON HUSBAND INCOME';
+                            break;
+                        case 'HOUSEBAND':
+                            sourceValue = 'WIFE INCOME';
+                            break;
+                        case 'STUDENT':
+                            sourceValue = 'DEPENDENT ON PARENTS';
+                            break;
+                        case 'EMPLOYED':
+                            sourceValue = 'SALARY';
+                            break;
+                        case 'SELF EMPLOYED':
+                            sourceValue = 'INCOME FROM FREELANCING';
+                            break;
+                        case 'UNEMPLOYED':
+                            sourceValue = 'DEPENDENT ON FAMILY';
+                            break;
+                        case 'PENSIONER/RETIRESS':
+                            sourceValue = 'PENSION';
+                            break;
+                        case 'FISHER MAN':
+                            sourceValue = 'INCOME FROM FISHING';
+                            break;
+                        case 'FARMER':
+                            sourceValue = 'INCOME FROM FARMING';
+                            break;
+                        case 'DRIVER':
+                            sourceValue = 'INCOME FROM DRIVING';
+                            break;
+                        case 'BUY AND SELL':
+                            sourceValue = 'INCOME FROM ONLINE SALES';
+                            break;
+                        case 'SENIOR CITIZEN':
+                            sourceValue = 'PENSION';
+                            break;
+                        case 'VENDOR':
+                            sourceValue = 'INCOME FROM COMMISSION'
+                        default:
+                            sourceValue = ''; // Default case
+                    }
+        
+                    incomeSource.value = sourceValue; // Set the income source value
+                }
+            </script>
+                <label id="Label">Occupation
+                    <select id="occupation" name="occupation" required onchange="updateIncomeSource()">
+                        <option value="">Select</option>
+                        <option value="HOUSEWIFE">HOUSEWIFE</option>
+                        <option value="HOUSEBAND">HOUSEBAND</option>
+                        <option value="STUDENT">STUDENT</option>
+                        <option value="EMPLOYED">EMPLOYED</option>
+                        <option value="UNEMPLOYED">UNEMPLOYED</option>
+                        <option value="PENSIONER/RETIRESS">PENSIONER/RETIRESS</option>
+                        <option value="SELF EMPLOYED">SELF EMPLOYED</option>
+                        <option value="SENIOR CITIZEN">SENIOR CITIZEN</option>
+                        <option value="FISHER MAN">FISHER MAN</option>
+                        <option value="FARMER">FARMER</option>
+                        <option value="DRIVER">DRIVER</option>
+                        <option value="DEALER">DEALER</option>
+                        <option value="BUY AND SELL">BUY AND SELL</option>
+                        <option value="BUSINESS OWNER">BUSINESS OWNER</option>
+                        <option value="VENDOR">VENDOR</option>
+                    </select>
+                </label>
+                
+                <label id="Label">Source of Income
+                    <select id="incomeSource" name="incomeSource" required>
+                        <option value="">Select</option>
+                        <option value="DEPENDENT ON PARENTS">DEPENDENT ON PARENTS</option>
+                        <option value="DEPENDENT ON FAMILY">DEPENDENT ON FAMILY</option>
+                        <option value="SALARY">SALARY</option>
+                        <option value="PENSION">PENSION</option>
+                        <option value="DEPENDENT ON HUSBAND INCOME">DEPENDENT ON HUSBAND INCOME</option>
+                        <option value="INCOME FROM SALES">INCOME FROM SALES</option>
+                        <option value="INCOME FROM ONLINE SALES">INCOME FROM ONLINE SALES</option>
+                        <option value="INCOME FROM FREELANCING">INCOME FROM FREELANCING</option>
+                        <option value="INCOME FROM FISHING">INCOME FROM FISHING</option>
+                        <option value="INCOME FROM FARMING">INCOME FROM FARMING</option>
+                        <option value="INCOME FROM DRIVING">INCOME FROM DRIVING</option>
+                        <option value="INCOME FROM COMMISSION">INCOME FROM COMMISSION</option>
+                        <option value="WIFE INCOME">WIFE INCOME</option>
+                        <option value="BUSINESS INCOME">BUSINESS INCOME</option>
+                    </select>
+                </label>
+        
+                <label id ="Label">Purpose of Transactions 
+                    <select name="purpose" id="purpose" required>
+                        <option value="">Select Purpose</option>
+                        <option value="Allowance">Allowance</option>
+                        <option value="Banking Purposes">Banking Purposes</option>
+                        <option value="Bills Payment">Bills Payment</option>
+                        <option value="Burial">Burial</option>
+                        <option value="Buy to Pawn">But to Pawn</option>
+                        <option value="Capital For Business">Capital For Business</option>
+                        <option value="Car Repair">Car Repair</option>
+                        <option value="Daily Needs">Daily Needs</option>
+                        <option value="Dowry">Dowry</option>
+                        <option value="Groceries">Groceries</option>
+                        <option value="Grooming">Grooming</option>
+                        <option value="Hospitalization">Hospitalization</option>
+                        <option value="House Renovation, construction, Repair">House Renovation, construction, Repair</option>
+                        <option value="Lend Money">Lend Money</option>
+                        <option value="Lot Payment">Lot Payment</option>
+                        <option value="Loan Payment">Loan Payment</option>
+                        <option value="Medical-check up">Medical-check up</option>
+                        <option value="Medication">Medication</option>
+                        <option value="Parcel Payment">Bills Payment</option>
+                        <option value="Payment of tax and license">Payment of tax and license</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Process requirements and documents">Process requirements and documents</option>
+                        <option value="Purchase">Purchase</option>
+                        <option value="Redeem Sanla">Redeem Sanla</option>
+                        <option value="Renew Sanla">Renew Sanla</option>
+                        <option value="Rent">Rent</option>
+                        <option value="Repair and Maintenance">Repair and Maintenance</option>
+                        <option value="Repair Vehicle">Repair Vehicle</option>
+                        <option value="Salary of Staff">Salary of Staff</option>
+                        <option value="School Expenses">School Expenses</option>
+                        <option value="Send Money">Send Money</option>
+                        <option value="Special Occasion">Special Occasion</option>
+                        <option value="Travel">Travel</option>
+                        <option value="Tuition">Tuition</option>
+                        <option value="Others">Others</option>
+                        <option value="Other Medical Needs">Other Medical Needs</option>
+                        <option value="Election Purposes">Election Purposes</option>
+                    </select>
+                </label>
+                
+                <label id ="Label">Amount<input type="text" name="amount" id="Amount" required></label>
+                <label id ="Label">First Transaction<input type="date" name="firstTransaction" id="firstTransaction" required></label>
+                <label id ="Label">How Customer Hear ABout Us:
+                <select id="hearus" name="discover" required>
+                    <option value="">Select</option>
+                    <option value="NEW SG- ADS (FACEBOOK, RADIO, ETC.)">NEW SG- ADS (FACEBOOK, RADIO, ETC.)</option>
+                    <option value="NEW SG- CO-WORKER/S">NEW SG- CO-WORKER/S</option>
+                    <option value="NEW SG- FAMILY (MOTHER, FATHER, SISTER, BROTHER)">NEW SG- FAMILY (MOTHER, FATHER, SISTER, BROTHER)</option>
+                    <option value="NEW SG- FRIEND/S">NEW SG- FRIEND/S</option>
+                    <option value="NEW SG- LIVE NEARBY">NEW SG- LIVE NEARBY</option>
+                    <option value="NEW SG- NEIGHBOR">NEW SG- NEIGHBOR</option>
+                    <option value="NEW SG- REFERRED BY OTHER PAWNSHOP">NEW SG- REFERRED BY OTHER PAWNSHOP</option>
+                    <option value="NEW SG- RELATIVES (AUNT,COUSIN,UNCLE ETC.)">NEW SG- RELATIVES (AUNT,COUSIN,UNCLE ETC.)</option>
+                    <option value="NEW SG- SCB CUSTOMER">NEW SG- SCB CUSTOMER</option>
+                    <option value="NEW SG- SGPI EMPLOYEE">NEW SG- SGPI EMPLOYEE</option>
+                    <option value="NEW SG- SIBLING/S">NEW SG- SIBLING/S</option>
+                    <option value="NEW SG- SIGNAGES">NEW SG- SIGNAGES</option>
+                    <option value="NEW SG- SOPHIA CUSTOMER">NEW SG- SOPHIA CUSTOMER</option>
+                    <option value="NEW SG- SOPHIA EMPLOYEE">NEW SG- SOPHIA EMPLOYEE</option>
+                    <option value="NEW SG- SPOUSE (WIFE/HUSBAND)">NEW SG- SPOUSE (WIFE/HUSBAND)</option>
+                    <option value="NEW SG- WORK NEARBY">NEW SG- WORK NEARBY</option>
+                    <option value="NEW SG- RECOMMENDED BY OTHER PAWNSHOPS">NEW SG- RECOMMENDED BY OTHER PAWNSHOPS</option>
+                    <option value="NEW SG- FROM S.O">NEW SG- FROM S.O</option>
+                    <option value="NEW SG- FROM CUSTOMER AWARENESS (STICKER CAMPAIGN, LEAFLETS, ETC.)">NEW SG- FROM CUSTOMER AWARENESS (STICKER CAMPAIGN, LEAFLETS, ETC.)</option>
+                    <option value="WITH RECORD IN OTHER BRANCH">WITH RECORD IN OTHER BRANCH</option>
+                    <option value="EXISTING- LONG LOST YES">EXISTING- LONG LOST YES</option>
+                </select>
+            </label>
+                
+            </div>
+                <input type="submit" value="Submit" placeholder="Submit">
+            </form>
+            </div>
+        </div>
+        </div>
+             
+                <script>
+                    function logout() {
+                        // Make a POST request to logout
+                        fetch('/submit', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                            },
+                            body: new URLSearchParams({ action: 'logout' }) // Set action to logout
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = '/login'; // Redirect to login page on success
+                            } else {
+                                console.error('Logout failed');
+                            }
+                        })
+                        .catch(error => console.error('Error:', error));
+                    }
+        
+                    function showCustomerInformation() {
+                       // Redirect to the customer information page
+                      window.location.href = '/customerinfo'; 
+                    }
+        
+        
+            function showForm(formId) {
+                // Hide all forms
+                const forms = document.querySelectorAll('.form-section');
+                forms.forEach(form => form.style.display = 'none');
+        
+                // Show the selected form
+                document.getElementById(formId).style.display = 'block';
+            }
+        </script>
+        </body>
+
+</html>

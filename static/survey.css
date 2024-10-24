@@ -1,0 +1,114 @@
+body{
+    background-color: #FFD700;;
+}
+
+h2{
+    text-align: center;
+    color: #0033cc;
+    margin-bottom: 20px;
+}
+
+form{
+    background-color: #f4f6f9; /* Light gray background */
+    border-radius: 10px;
+    padding: 90px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+ 
+    margin:100px auto;
+    width: 30%;
+
+}
+form h1{
+    color: blue;
+    font-family: 'Times New Roman', Times, serif;  
+    font-size: 30px;
+    text-align: center;
+}
+#Label{
+    color: #0033cc;
+    font-weight: bold;
+    font-size: 1rem;
+}
+ input[type="submit"]{
+    background-color: #0033cc;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 5px;
+    margin-top: 15px;
+    transition: background-color 0.3s ease;
+    width: 100%;
+}
+input[type="submit"]:hover{
+    background-color: #0052cc;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+p{
+display: block;
+    background-color: #0033cc; /* Blue background */
+    color: white;
+    border: none;
+    padding: 10px 10px;
+    text-align: center;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 10px auto;
+    border-radius: 8px;
+    width: 140px;
+}
+
+#age, #name,#loan , #birthday, #address, #contact, #occupation, #incomeSource,#purpose, #Amount,#firstTransaction,#discover,#Branch, #hearus{
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border: 2px solid #0033cc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+   }
+   h2 {
+    text-align: center;
+    color: #0033cc;
+    margin-bottom: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+   .autocomplete-suggestions {
+    border: 1px solid blue;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    width: 30%;
+    display: block;
+}
+.autocomplete-suggestion {
+    padding: 8px;
+    cursor: pointer;
+}
+.autocomplete-suggestion:hover {
+    background: #e9e9e9;
+}
+
+
+.visible {
+    display: block;
+}
+
+#suggestionsBox1{
+    border: 1px solid blue;
+    max-height: 150px;
+    overflow-y: auto;
+    position: absolute;
+    z-index: 1000;
+    background: white;
+    width: 30%;
+}

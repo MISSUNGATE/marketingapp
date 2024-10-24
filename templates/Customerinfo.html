@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieve Customers</title>
+    <style>
+        h1
+        {
+            text-align: center;
+            color:#0033cc;
+            font-size: 50px;
+        }
+        form{
+            width: 100%;
+    display: flex;
+    flex-direction: column;
+
+        }
+     #Searchdate{
+        margin: 1em auto;
+        padding: 5px;
+        border-radius: 10px;
+     }
+     #Searchcustomer{
+        margin: 1em auto;
+        padding: 10px;
+        border-radius: 10px;
+        border-bottom: 3px solid #0033cc;
+      
+     }
+     #label{
+        display: block;
+        margin: 2px;
+
+     }
+     button[
+        type="submit"]{
+        width: 20%;
+        text-align: center;
+        padding: 10px;
+        background-color: #0033cc;
+        border-radius: 10px;
+        color: #fff;
+
+     }
+        .customer-container{
+    width: 100%;
+    margin-top: 5px;
+    border-collapse: collapse;
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    text-align: center;
+    color:blue;
+}
+table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #f0f0f0;
+            border-radius: 50px;
+        }
+        th, td {
+            border: 1px solid #0033cc;
+            padding: 8px;
+            text-align: center;
+            color: #0033cc;
+        }
+        thead{
+            background-color: steelblue;
+            border: 2px solid white;
+            height: 70px;
+            font-size: 15px;
+            color: white;
+        }
+        th{
+            color: white;
+            border: white;
+        }
+        h2{
+            font-size: 40px;
+        }
+        tr{
+            border: none;
+            border-bottom: 2px solid steelblue;
+        }
+        td{
+            border: none;
+        }
+            .suggestions {
+            border: 1px solid #ccc;
+            background-color: #fff;
+            position: absolute;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 200px;
+        }
+        .suggestion-item {
+            padding: 8px;
+            cursor: pointer;
+        }
+        .suggestion-item:hover {
+            background-color: #f0f0f0;
+        }
+        body{
+            background-color:  #FFD700;
+        }
+    </style>
+</head>
+<body>
+    <div class="searcher">
+        <form action="/search-customers" method="GET" id="searchForm">
+            <h1>CUSTOMER INFOTMATION</h1>
+            <label for="Searchcustomer" id="label">Search by Name
+                <input type="text" name="Searchcustomer" id="Searchcustomer" placeholder="Seach Customer" onkeyup="fetchSuggestions()">
+            </label>
+            <label for="Searchdate" id="label">Search by Date
+                <input type="date" name="Searchdate" id="Searchdate">
+            </label>
+            <button type="submit">Search</button>
+            <div id="suggestion-box" class="suggestions"></div>
+        </form>
+    </div>
+    <div class="customer-container">
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Branch</th>
+                <th>LoanDate</th>
+                <th>Age</th>
+                <th>Birthday</th>
+                <th>Address</th>
+                <th>Customer_work</th>
+                <th>Source_Income</th>
+                <th>Purpose</th>
+                <th>Amount</th>
+                <th>FirstTransaction</th>
+                <th>Status</th>
+                <th>discover_by</th>
+                <th>created_at</th>
+            </tr>
+        </thead>
+        <tbody id="customer-list">
+            {% for customer in results %}
+                <tr>
+                    <td>{{ customer.name }}</td>
+                    <td>{{ customer.branch }}</td>
+                    <td>{{ customer.LoanDate }}</td>
+                    <td>{{ customer.Age }}</td>
+                    <td>{{ customer.Birthday }}</td>
+                    <td>{{ customer.Address }}</td>
+                    <td>{{ customer.Customer_Work }}</td>
+                    <td>{{ customer.Source_Income }}</td>
+                    <td>{{ customer.Purpose }}</td>
+                    <td>{{ customer.Amount }}</td>
+                    <td>{{ customer.FirstTransaction }}</td>
+                    <td>{{ customer.Status }}</td>
+                    <td>{{ customer.discover_by }}</td>
+                    <td>{{ customer.submitted_at }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Fetch all customers when the page loads
+        function getcustomers() {
+            fetch('/get-customers')  
+                .then(response => response.json())
+                .then(data => {
+                    updateTable(data); // Update the table with initial data
+                })
+                .catch(error => {
+                    console.error('Error fetching customer data:', error);
+                });
+        }
+    
+        // Function to update the customer table
+        function updateTable(data) {
+            const customerList = document.getElementById('customer-list');
+            customerList.innerHTML = ""; // Clear existing list
+    
+            if (Array.isArray(data) && data.length > 0) {
+                data.forEach(customer => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${customer.name}</td>
+                        <td>${customer.branch}</td>
+                        <td>${customer.LoanDate}</td>
+                        <td>${customer.Age}</td>
+                        <td>${customer.Birthday}</td>
+                        <td>${customer.Address}</td>
+                        <td>${customer.Customer_Work}</td>
+                        <td>${customer.Source_Income}</td>
+                        <td>${customer.Purpose}</td>
+                        <td>${customer.Amount}</td>
+                        <td>${customer.FirstTransaction}</td>
+                        <td>${customer.Status}</td>
+                        <td>${customer.discover_by}</td>
+                        <td>${customer.created_at}</td>
+                    `;
+                    customerList.appendChild(row);
+                });
+            } else {
+                customerList.innerHTML = "<tr><td colspan='14'>No customers found.</td></tr>";
+            }
+        }
+    
+        // Handle search submission
+        document.getElementById('searchForm').onsubmit = function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            const selectedCustomer = document.getElementById('Searchcustomer').value;
+            const selectedDate = document.getElementById('Searchdate').value;
+    
+            // Fetch search results
+            fetch(`/search-customers?Searchcustomer=${encodeURIComponent(selectedCustomer)}&Searchdate=${encodeURIComponent(selectedDate)}`)
+                .then(response => response.json())
+                .then(data => {
+                    updateTable(data); // Update the table with search results
+                })
+                .catch(error => {
+                    console.error('Error fetching customer data:', error);
+                });
+        }
+    
+        window.onload = getcustomers; // Load customers on page load
+    </script>
+  <script>
+    function fetchSuggestions() {
+        const searchTerm = document.getElementById('Searchcustomer').value;
+        if (searchTerm.length > 1) { // Only fetch suggestions if user typed 2 or more characters
+            fetch(`/suggest-customers?term=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Display suggestions
+                    const suggestionBox = document.getElementById('suggestion-box');
+                    suggestionBox.innerHTML = ''; // Clear any previous suggestions
+
+                    data.forEach(suggestion => {
+                        const div = document.createElement('div');
+                        div.classList.add('suggestion-item');
+                        div.textContent = suggestion;
+
+                        // When a suggestion is clicked, populate the search field with the name
+                        div.onclick = function () {
+                            document.getElementById('Searchcustomer').value = suggestion;
+                            suggestionBox.innerHTML = ''; // Clear suggestions
+                        };
+
+                        suggestionBox.appendChild(div);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                });
+        } else {
+            document.getElementById('suggestion-box').innerHTML = ''; // Clear suggestions if no search term
+        }
+    }
+</script>
+</body>
+</html>

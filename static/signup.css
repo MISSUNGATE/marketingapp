@@ -1,0 +1,51 @@
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color:#FFD700;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+}
+form{
+    margin: 10px;
+    border-radius: 20px;
+    padding: 50px;
+    background-color:#f4f6f9;
+    backdrop-filter: blur(50px);
+    border: 1px solid rgba(255,255,255);
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+label{
+    display: block;
+    margin: 1em auto;
+    color:#0033cc;
+}
+#branch, #password, #email, #user,#branchid{
+    display: block;
+    margin: 2em auto;
+padding:12px;
+width: 80%;
+border: 2px solid #0033cc;
+border-radius: 8px;
+transition: border-color 0.3s ease;
+}
+h1{
+    color:#0033cc;
+    font-weight: 900;
+}
+input[type="submit"]
+{
+    display: block;
+    background-color: blue; /* Blue background */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 10px auto;
+    border-radius: 8px;
+    width: 100px;
+}

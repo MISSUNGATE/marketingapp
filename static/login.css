@@ -1,0 +1,111 @@
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #FFD700;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+form{
+    position: relative;   
+    padding: 50px;
+    margin: 10px;
+    border-radius: 20px;
+    border: 2px solid rgba(255,255,255,0.6);
+    backdrop-filter: blur(55px);
+    text-align: center;
+    background-color:#f4f6f9;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.inputbox input{
+    display: block;
+    margin: 3em auto;
+    padding:12px;
+    width: 80%;
+    border: none;
+    border-bottom: 2px solid blue;
+    border-radius: 3px;
+    transition: border-color 0.3s ease;
+    background: transparent;
+    color:black;
+
+}
+.inputbox ion-icon {
+    position: absolute;
+}
+
+input[type="submit"]{
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 15px;
+    margin-top: 15px;
+    background-color: #0033cc;
+border: 1px solid blue;
+outline:none;
+cursor: pointer;
+width: 80%;
+font-weight: 600;
+margin-bottom: 30px;
+color: white;
+}
+input[type="submit"]:hover{
+background-color:lightblue;
+}
+
+
+#branchd{
+    border:none;
+    border-bottom:1px solid blue;
+    border-radius:1px;
+    transition: border-color 0.3s ease;
+    padding:5px;
+    background-color: transparent;
+    color:#0033cc;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.signups a{
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    text-align: center;
+    color:#0033cc;
+}
+.signups{
+    border-radius: 50px;
+    border: 1px solid white;
+    background-color: transparent;
+    padding: 5px;
+    width: 80%;
+    margin-left:20px;
+
+  
+
+}
+.signups:hover{
+    background-color: lightblue;
+}
+h1{
+    color:#0033cc;
+    font-size: 35px;
+    font-weight: 900;
+
+}
+h2{
+    margin-top: 50px;
+    font-size: 30px;
+    color:#0033cc;
+}
+#Branch{
+    color:white;
+    font-weight: bold;
+    font-size: 1rem;
+}
+a{
+   
+    font-weight: bold;
+    margin:25px 0 10px;
+}

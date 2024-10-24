@@ -1,0 +1,60 @@
+<!DOCTYPE html> 
+<html lang ="en">
+    <head>
+        <title>Log In</title>
+        <link rel="stylesheet" href="../static/login.css">
+
+        <script>
+            function updateUsernamePlaceholder() {
+                const branchselect = document.getElementById('branch');
+                const usernameInput = document.getElementById('username');
+                const selectedBranch = branchselect.value;
+            
+                if (selectedBranch) {
+                    usernameInput.placeholder = `${selectedBranch}username`;
+                } else {
+                    usernameInput.placeholder = "User Name";
+                }
+            }
+            
+            </script>
+    </head>
+    <body>
+        <section>
+        <form method="POST" action="/login">
+            <H1> Sun Gate <br> Pawnshop, Inc.<br> </H1>
+            <select id="branchd" onchange="updateUsernamePlaceholder()" name="branch">
+                <option value="">Select Branch</option>
+                <option>AL</option>
+                <option>G1</option>
+                <option>BAZ</option>
+                <option>ME</option>
+                <option>PS</option>
+                <option>LP</option>
+                <option>SM</option>
+                <option>GL1</option>
+                <option>GL2</option>
+                <option>GL3</option>
+                <option>GU</option>
+                <option>SJ</option>
+                <option>TU</option>
+                <option>VE</option>
+                <option>CA</option>
+                <option>TC</option>
+                <option>DV</option>
+                <option>PA</option>
+                <option>AA</option>
+                <option>BA1</option>
+                <option>MS</option>
+            </select>
+            <div class="inputbox">
+<input type="text" class="username" id="username" name="username" placeholder="User Name">
+<input type="password" class="password" id="password" name="password" placeholder="Password"></div> 
+            <input type="submit" class="submit" value="Log In" id="submit">
+            <div class="signups">
+            <a href="/signup" class="signup">Sign Up</a>
+        </div>
+        </form>
+    </section>
+    </body>
+</html>

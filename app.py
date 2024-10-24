@@ -7,6 +7,7 @@ import re
 from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash
 from datetime import datetime
+import os
 app = Flask(__name__)
 app.secret_key = '1234567'
 
@@ -467,4 +468,6 @@ def get_customer_info(name):
     connection.close()
     return customer or {}
 if __name__ == '__main__':
+    port = int(os.environ.get("PORT, 5000"))
+    app.run(host="0.0.0.0", port=port)
     app.run(debug=True)

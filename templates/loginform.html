@@ -20,8 +20,9 @@
             </script>
     </head>
     <body>
-        <section>
-        <form method="POST" action="/login">
+        <section class="login-section">
+            <div class="image"></div>
+             <form method="POST" action="/login" class="login-form">
             <H1> Sun Gate <br> Pawnshop, Inc.<br> </H1>
             <select id="branchd" onchange="updateUsernamePlaceholder()" name="branch">
                 <option value="">Select Branch</option>
@@ -48,13 +49,45 @@
                 <option>MS</option>
             </select>
             <div class="inputbox">
-<input type="text" class="username" id="username" name="username" placeholder="User Name">
-<input type="password" class="password" id="password" name="password" placeholder="Password"></div> 
+                <input type="text" class="username" id="username" name="username" placeholder="User Name">
+                <input type="password" class="password" id="password" name="password" placeholder="Password">
+            </div>
+           
             <input type="submit" class="submit" value="Log In" id="submit">
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div id="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+
             <div class="signups">
             <a href="/signup" class="signup">Sign Up</a>
         </div>
         </form>
     </section>
     </body>
+    <script>
+        $(document).ready(function() {
+            const errorMessage = "{{ get_flashed_messages(with_categories=true) }}";
+            const successMessage = "{{ get_flashed_messages(with_categories=true) }}";
+            
+            if (errorMessage) {
+                $('#errorBox').text(errorMessage[0][1]); // Get the first error message
+                $('#errorBox').fadeIn().delay(3000).fadeOut(); // Show and hide the message
+            }
+            
+            if (successMessage) {
+                $('#successBox').text(successMessage[0][1]); // Get the first success message
+                $('#successBox').fadeIn().delay(3000).fadeOut(); // Show and hide the message
+            }
+        });
+    </script>
+    
 </html>

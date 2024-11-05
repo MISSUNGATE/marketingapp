@@ -1,17 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head><title>Sign Up </title></head>
+    <head><title>Sign Up </title>
     <link rel="stylesheet" href="../static/signup.css">
+    <script>
+        function validateform(){
+            const branch = document.getElementById('branch').value;
+            const password = document.getElementById('password').value;
+            const confirmPasword = document.getElementById('confirm_password').value;
+            const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+           
+            let isValid = true;
+           
+            if (!branchPattern.test(branch)) {
+                alert('Branch name must be alphanumeric.');
+                return false;
+            }
+            if (!passwordPattern.test(password)) {
+                alert('Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.');
+                return false;
+            }
+            if (password !== confirmPasword) {
+                alert('Passwords do not match.');
+                return false;
+            }
+            return isValid;
+        }
+           
+    </script>
+</head>
     <body>
-        <form method="POST" action="/signup">
+        <form method="POST" action="/signup" onsubmit="return validateform()">
             <h1>Register Branch</h1>
-            <label>Branch<input type="text" class="branch" id="branch" name="branch"> </label>
-            <label>Branch ID<input type="text" class="branchid" id="branchid" name="branch_id"> </label>
-            <label>UserName<input type="text" id="user" name="user"> </label>
-            <label>Password<input type="password" id="password" name="password"> </label>
-            <label>Email<input type="email" id="email" name="email"> </label>
+            <label>Branch<input type="text" class="branch" id="branch" name="branch" required> </label>
+            <small id="branchError" style="color: red;"></small>
+            <label>Branch ID<input type="text" class="branchid" id="branchid" name="branch_id" required> </label>
+            <label>UserName<input type="text" id="user" name="user" required> </label>
+            <label>Password<input type="password" id="password" name="password" required> </label>
+            <small id="passwordError" style="color: red;"></small>
+            <label>Confirm Password<input type="password" id="confirm_password" name="confirm_password" required></label>
+            <small id="confirmPasswordError" style="color: red;"></small>
+            <label>Email<input type="email" id="email" name="email" required> </label>
         <input type="submit" name="Register" id="Register" value="Register">
-
+        <div id="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+        </div>
         </form>
+        <script>
+            $(document).ready(function() {
+                const errorMessage = "{{ get_flashed_messages(with_categories=true) }}";
+                const successMessage = "{{ get_flashed_messages(with_categories=true) }}";
+                
+                if (errorMessage) {
+                    $('#errorBox').text(errorMessage[0][1]); // Get the first error message
+                    $('#errorBox').fadeIn().delay(3000).fadeOut(); // Show and hide the message
+                }
+                
+                if (successMessage) {
+                    $('#successBox').text(successMessage[0][1]); // Get the first success message
+                    $('#successBox').fadeIn().delay(3000).fadeOut(); // Show and hide the message
+                }
+            });
+        </script>
     </body>
 </html>

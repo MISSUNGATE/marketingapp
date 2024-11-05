@@ -1,28 +1,58 @@
-body{
+*{
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #FFD700; /* Company yellow */
+}
+body{
+    background-color: #002366; /* Company yellow */
     margin: 0;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    border:1px solid blue;
+    height: 100vh;
 
 }
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  
+}
 .content{
-    padding: 50px;
-    margin-top: 80px;
+    padding: 40px;
     width: 80%;
     max-width: 1200px;
+    border: 1px solid #FFD700;
+    margin-right: 80px;
+    background-color: #e9e9e9;
+    border-radius: 10px;
+    margin-left: 100px;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 1);
 }
 #welcome{
     text-align: center;
-    color: #0033cc; /* Company blue */
+    color: #FFD700; /* Company blue */
     font-size: 5rem;
-    margin: 20px 0;
+    margin-left: 1em;
 }
-button[type="button"]{
+p{
+        
+        background-color:transparent; /* Blue background */
+        color:#FFD700;
+        border: 0.2px solid;
+        padding: 10px 10px;
+        text-align: center;
+        font-size: 1rem;
+        cursor: pointer;
+        margin: 10px auto;
+        border-radius: 8px;
+        width: 140px;
+    }
+.custo{
     display: block;
-    background-color: #0033cc; /* Blue background */
+    background-color: #558010; /* Blue background */
     color: white;
     border: none;
     padding: 10px 10px;
@@ -34,37 +64,64 @@ button[type="button"]{
     width: 200px;
     transition: background-color 0.3s ease;;
 }
+
 button[type="button"]:hover{
     background-color: #0052cc;
 }
-fieldset{
+.logout-btn{
+    background-color: #558010; /* Blue background */
+    color: white;
     border: none;
+    padding: 10px 10px;
+    text-align: center;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 10px auto;
+    border-radius: 8px;
+    width: 130px;
+    transition: background-color 0.3s ease;;
+}
+#goto{
+    background-color: #002299;
+    color: white;
+    border: none;
+    padding: 10px 10px;
+    text-align: center;
+    font-size: 1rem;
+    cursor: pointer;
+    margin: 10px auto;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+fieldset{
+    border:none;
+    border-bottom: 2px solid #FFD700;
+    width:50%;
+    margin-left:26%;
+  
+  
 }
 .Search{
     background-color: #f4f6f9; /* Light gray background */
     backdrop-filter: blur(20px);
     border-radius: 10px;
-    padding: 20px;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    width: 70%;
-}
-#search, #branchd,#Occupation1,#address1{
-    color: #0033cc;
-    font-weight: bold;
-    font-size: 1rem;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+    width: 55%;
 }
 
-#searchInput,#branches, #work, #work, #addressed{
-    width: 90%;
+#searchInput{
+    width: 60%;
     padding: 10px;
     margin: 10px 0;
     border: 2px solid #0033cc;
     border-radius: 5px;
     font-size: 1rem;
 }
-#goto{
-    width: 90px;
+#searcInput:focus{
+    border: 1px solid yellow;
 }
+
 #goto:hover{
     background-color: aquamarine;
 }
@@ -73,16 +130,18 @@ fieldset{
     margin-top: 20px;
     display: flex;
     flex-direction: column;
-    font-size: 20px;
+    font-size: 25px;
     text-align: center;
-    color:blue;
+    color:#0033cc;
 }
+
+
 #branchTransactions{
     font-size:10px;
 }
 #transactionInfo th, #transactionInfo td{
     
-    border: 2px solid #0033cc;
+    border: 1px solid #0033cc;
     padding: 5px;
     text-align: center;
     color: #0033cc;
@@ -102,25 +161,7 @@ fieldset{
     position: fixed;
     top: 20px;
     right: 20px;
-    background-color: #0033cc;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1.1em;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    width: 20px;
 }
-.logout-btn:hover {
-    background-color: #002299;
-}
-
-
-
-
-
-
 
 h2{
     text-align: center;
@@ -128,75 +169,6 @@ h2{
     margin-bottom: 20px;
 }
 
-form{
-    background-color: #f4f6f9; /* Light gray background */
-    border-radius: 10px;
-    padding: 50px;
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-    width: 100%;
-}
-form h1{
-    color: blue;
-    font-family: 'Times New Roman', Times, serif;  
-    font-size: 30px;
-    text-align: center;
-}
-#Label{
-    color: #0033cc;
-    font-weight: bold;
-    font-size: 1rem;
-}
- input[type="submit"]{
-    background-color: #0033cc;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    font-size: 1rem;
-    border-radius: 5px;
-    margin-top: 15px;
-    transition: background-color 0.3s ease;
-    width: 100%;
-}
-input[type="submit"]:hover{
-    background-color: #0052cc;
-}
-
-.footer {
-    text-align: center;
-    margin-top: 20px;
-}
-
-p{
-display: block;
-    background-color: #0033cc; /* Blue background */
-    color: white;
-    border: none;
-    padding: 10px 10px;
-    text-align: center;
-    font-size: 1rem;
-    cursor: pointer;
-    margin: 10px auto;
-    border-radius: 8px;
-    width: 140px;
-}
-
-#age, #name,#loan , #birthday, #address, #contact, #occupation, #incomeSource,#purpose, #Amount,#firstTransaction,#discover,#Branch{
-    width: 100%;
-    padding: 12px;
-    margin: 15px 0;
-    border: 2px solid #0033cc;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-   }
-   h2 {
-    text-align: center;
-    color: #0033cc;
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
    .autocomplete-suggestions {
     border: 1px solid blue;
     max-height: 150px;
@@ -230,3 +202,73 @@ display: block;
     width: 30%;
 }
 
+@media (max-width: 768px) {
+
+    button [type="submit"] {
+        position: static;
+        display: block;
+        margin: 10px auto;
+    }
+    #welcome{
+       padding: 50px;
+       font-size: 20px;
+    }
+   
+}
+
+@media (max-width: 990px) {
+.content{
+    padding: 0;
+    margin:45px;
+    display: flex;
+    flex-direction: column;
+    }
+    #welcome{
+        padding: 0;
+        margin: 0;
+        font-size: 3rem;
+    }
+
+    body{
+        display: flex;
+        flex-direction: column;
+    }
+
+    .table {
+        font-size: 0.8rem;
+    }
+    .Search{
+        margin-top: 15%;
+        padding: 10px;
+    }
+    #goto{
+        margin-top: 15%;
+    }
+    #transactionInfo table{
+    padding: 5px;
+    margin:25px;
+   
+    }
+}
+
+
+@media (max-width: 576px) {
+   #welcome{
+    font-size: 2.8rem;
+    margin-top: 15%;
+   }
+   table{
+    padding: 0;
+    margin: 0;
+   }
+  
+   h2{
+    padding:1px;
+   }
+   .search{
+    padding: 50px;
+   }
+    h3{
+        margin:0;
+    }
+}

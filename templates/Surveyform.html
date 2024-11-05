@@ -4,8 +4,11 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <link rel="stylesheet" href="../static/survey.css">
+        <link rel="stylesheet" href="../static/survey.css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
         <title>Form</title>
+        <meta name="csrf-token" content="{{ csrf_token }}">
 
     <script>
         const locations = [
@@ -52,7 +55,8 @@
                     const value = this.value;
                     closeAllLists();
                     if (!value) return;
-    
+
+
                     const suggestionBox = document.createElement("div");
                     suggestionBox.setAttribute("class", "autocomplete-suggestions");
                     this.parentNode.appendChild(suggestionBox);
@@ -65,9 +69,13 @@
                             suggestionItem.addEventListener("click", function() {
                                 input.value = this.innerHTML;
                                 closeAllLists();
-                                fetchDetails(this.innerHTML);
-                                fetchCustomerDetails(this.innerHTML); // For existing names
-                                fetchCustomerInfo(this.innerHTML); 
+                               
+                                if (input.id === 'address') {
+                        fetchCustomerInfo(this.innerHTML); // Fetch additional info based on the address
+                    } else {
+                        fetchDetails(this.innerHTML);
+                        fetchCustomerDetails(this.innerHTML); // For existing names
+                    }    
                             });
                             suggestionBox.appendChild(suggestionItem);
                         }
@@ -78,7 +86,13 @@
                     const items = document.querySelectorAll(".autocomplete-suggestions");
                     items.forEach(item => item.parentNode.removeChild(item));
                 }
-    
+                function handleCustomerTypeChange() {
+    const customerType = document.querySelector('input[name="customerType"]:checked').value;
+
+    if (customerType === 'new customer') {
+        clearFields(); // Clear fields only when switching to a new customer
+    }
+}
         function fetchCustomerDetails(name) {
         fetch('/check_name', {
             method: 'POST',
@@ -90,13 +104,22 @@
         .then(response => response.json())
         .then(data => {
             if (data && data.customerType === 'existing') {
+                
+                if (data.birthday) {
+                const formattedBirthday = convertDateToISO(data.birthday); // Convert to YYYY-MM-DD
+                document.getElementById('birthday').value = formattedBirthday;
+            }
+
+            if (data.firstTransaction) {
+                const formattedFirstTransaction = convertDateToISO(data.firstTransaction); // Convert to YYYY-MM-DD
+                document.getElementById('firstTransaction').value = formattedFirstTransaction;
+            }
+
                 // Populate fields with the retrieved data
                 document.getElementById('age').value = data.age;
-                document.getElementById('birthday').value = data.birthday;
                 document.getElementById('occupation').value = data.occupation;
                 document.getElementById('incomeSource').value = data.incomeSource;
                 document.getElementById('address').value = data.address;
-                document.getElementById('firstTransaction').value = data.firstTransaction
                
                 document.querySelector('input[name="customerType"][value="existing"]').checked = true;
                 
@@ -116,27 +139,17 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name: name })
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error('Network response was not ok: ' + response.statusText + ' - ' + text);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data && Object.keys(data).length > 0) {
-                document.getElementById('branches').value = data.Branch || '';
-                document.getElementById('work').value = data.Customer_work || '';
-                document.getElementById('addressed').value = data.Address || '';
-                fetchCustomerTransactions(name);
-            } else {
-                clearFields();
-                console.log("No customer data found.");
-            }
-        })
-        .catch(error => console.error('Error fetching customer info:', error));
-    }
+        .then(response => response.json())
+    .then(data => {
+        if (data && Object.keys(data).length > 0) {
+            document.getElementById('branches').value = data.Branch || '';
+            document.getElementById('work').value = data.Customer_work || '';
+            document.getElementById('addressed').value = data.Address || '';
+            fetchCustomerTransactions(name); // Calls for transaction data
+        } 
+    })
+    .catch(error => console.error('Error fetching customer info:', error));
+}
     
     function fetchCustomerTransactions(name) {
         fetch('/get_customer_transactions', {
@@ -206,7 +219,13 @@
                 autocomplete(anotherSearchInput, existingNames, fetchCustomerDetails);
             })
             .catch(error => console.error('Error fetching names:', error));
-            
+            const params = new URLSearchParams(window.location.search);
+            const customerName = params.get('customerName');
+
+        if (customerName) {
+            // Fetch and display customer details if the name exists
+            fetchCustomerDetails(customerName);
+        }
     
             fetch('/get_global_names')
             .then(resp => resp.json())
@@ -226,6 +245,7 @@
             const customerTypeRadios = document.querySelectorAll('input[name="customerType"]');
             customerTypeRadios.forEach(radio => {
             radio.addEventListener('change', handleCustomerTypeChange);
+            document.getElementById('home-button').addEventListener('click', redirectToHome);
             const customerInfo = localStorage.getItem('customerInfo');
     if (customerInfo) {
         const info = JSON.parse(customerInfo);
@@ -327,13 +347,23 @@
             targetField.value = sourceDate; // Set the target date to the source date
         }
     }
-    
+    function convertDateToISO(dateString) {
+    const [month, day, year] = dateString.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}
+function redirectToHome() {
+            window.location.href = '/'; // Change '/' to your actual home page URL if needed
+        }
         </script>
+    
         </head>
         <body>
+            <button type="button" id="home-button" class="home">  <i class="fas fa-home"></i> Home</button>
             <form method="POST" action="/submit">
+              
                 <h1>Customer Information Form</h1>
                 <div class="div1">
+                 
                 <label id="Label">Branch<input type="text" value="{{ branch }}" name="branch" placeholder="Branch" id="Branch" value="{{ customer_info.Name }}" required></label>
                 <label id ="Label">Name<input type="text" name="name" placeholder="Last Name, First Name Middle Initial" id="name" required></label>
                 <label id ="Label"><input type="radio" name="customerType" value="new customer" id="new customer" checked>New Customer</label>

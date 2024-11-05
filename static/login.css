@@ -1,111 +1,137 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+h1{
+    font-size: 40px;
+    text-align: center;
+}
+
 body{
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #FFD700;
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
+    background-color: #002366;
 }
-form{
-    position: relative;   
-    padding: 50px;
-    margin: 10px;
-    border-radius: 20px;
-    border: 2px solid rgba(255,255,255,0.6);
-    backdrop-filter: blur(55px);
+.login-section{
+    background-color: #F9F9F9;
+    width: 400px;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     text-align: center;
-    background-color:#f4f6f9;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+   
 }
-.inputbox input{
-    display: block;
-    margin: 3em auto;
-    padding:12px;
-    width: 80%;
-    border: none;
-    border-bottom: 2px solid blue;
-    border-radius: 3px;
-    transition: border-color 0.3s ease;
-    background: transparent;
-    color:black;
+
+.login-form h1{
+    color: #002366; /* Company Blue */
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+select, .inputbox input{
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+    outline: none;
 
 }
-.inputbox ion-icon {
-    position: absolute;
+.inputbox input:focus {
+    border-color: #002366; /* Company Blue */
+    box-shadow: 0 0 5px rgba(0, 35, 102, 0.5);
+}
+select #branchid:focus{
+    border-color: #002366; /* Company Blue */
+    box-shadow: 0 0 5px rgba(0, 35, 102, 0.5);
 }
 
 input[type="submit"]{
-    padding: 10px 15px;
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #002366; /* Company Blue */
+    color: #FFF;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
     cursor: pointer;
-    border-radius: 15px;
-    margin-top: 15px;
-    background-color: #0033cc;
-border: 1px solid blue;
-outline:none;
-cursor: pointer;
-width: 80%;
-font-weight: 600;
-margin-bottom: 30px;
-color: white;
+    transition: background 0.3s ease;
+    margin-top: 1rem;
 }
 input[type="submit"]:hover{
-background-color:lightblue;
-}
-
-
-#branchd{
-    border:none;
-    border-bottom:1px solid blue;
-    border-radius:1px;
-    transition: border-color 0.3s ease;
-    padding:5px;
-    background-color: transparent;
-    color:#0033cc;
-    font-weight: bold;
-    font-size: 1rem;
+background-color:#FFD708;
 }
 
 .signups a{
+    display: inline-block;
+    margin-top: 1.5rem;
+    color: #002366; /* Company Blue */
+    font-size: 0.9rem;
     text-decoration: none;
-    font-weight: bold;
-    font-size: 1rem;
-    text-align: center;
-    color:#0033cc;
+    transition: color 0.3s ease;
 }
-.signups{
-    border-radius: 50px;
-    border: 1px solid white;
-    background-color: transparent;
-    padding: 5px;
-    width: 80%;
-    margin-left:20px;
 
-  
-
-}
 .signups:hover{
-    background-color: lightblue;
+    color: #003580; /* Darker Blue */
 }
-h1{
-    color:#0033cc;
-    font-size: 35px;
-    font-weight: 900;
+#flash-messages {
+    margin-top: 1rem;
+}
 
+.error-box {
+    display: none; /* Initially hidden */
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 5px;
+    z-index: 1000;
 }
-h2{
-    margin-top: 50px;
-    font-size: 30px;
-    color:#0033cc;
+.error-box {
+    color: red; /* Set text color for errors */
+    display: none; /* Hide by default */
 }
-#Branch{
-    color:white;
-    font-weight: bold;
-    font-size: 1rem;
+
+.success-box {
+    color: green; /* Set text color for success */
+    display: none; /* Hide by default */
 }
-a{
-   
-    font-weight: bold;
-    margin:25px 0 10px;
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+    border-radius: 4px;
 }
+
+.alert-success {
+    color: #3c763d;
+    background-color: #dff0d8;
+    border-color: #d6e9c6;
+}
+
+.alert-danger {
+    color: #a94442;
+    background-color: #f2dede;
+    border-color: #ebccd1;
+}
+
+.alert-warning {
+    color: #8a6d3b;
+    background-color: #fcf8e3;
+    border-color: #faebcc;
+}
+#branchd{
+    border: none;
+    border-bottom: 1px solid #FFD708;
+    width: 50%;
+}
+

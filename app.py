@@ -8,6 +8,8 @@ from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash
 from datetime import datetime
 import os
+from datetime import datetime
+from flask import Flask, flash, redirect, render_template, request, session, url_for
 app = Flask(__name__)
 app.secret_key = '1234567'
 
@@ -34,12 +36,18 @@ def get_db_connection():
 def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
+def validate_password(password):
+    # At least 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special character
+    return re.match(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", password)
+
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
         branch_name = request.form['branch']
         username = request.form['user']
         password = request.form['password']
+        confirm_password = request.form['confirm_password']
         email = request.form['email']
 
         # Basic validation
@@ -49,10 +57,24 @@ def signup():
 
         if not validate_email(email):
             return "Invalid email format", 400
+        
+        if not validate_password(password):
+            flash('Password must be at least 8 characters long and include one uppercase, one lowercase letter, one digit, and one special character.')
+            return redirect(url_for('signup'))
+
+        if password != confirm_password:
+            flash('Passwords do not match.')
+            return redirect(url_for('signup'))
 
         try:
             connection = get_db_connection()
             cursor = connection.cursor()
+
+            cursor.execute("SELECT id FROM pawnshopaccount WHERE email = %s", (email,))
+            existing_email = cursor.fetchone()
+            if existing_email:
+                flash('Email already exists. Please use a different email.', 'error')
+                return redirect(url_for('signup'))
 
             # Check if the branch already exists
             cursor.execute("SELECT id FROM branch WHERE name = %s", (branch_name,))
@@ -71,7 +93,8 @@ def signup():
                (username, generate_password_hash(password), email, branch_name, branch_id))
 
             connection.commit()
-
+            flash('Registration successful! Check your email to confirm.', 'success')
+       
             token = serializer.dumps(email, salt='email-confirm')
             confirm_link = url_for('confirm_email', token=token, _external=True)
 
@@ -126,15 +149,16 @@ def login():
     if request.method == 'POST':
         branch = request.form['branch']
         username = request.form['username']
-        full_username = f"{branch}{username}"
+        password = request.form['password']
+        full_username = f"{username}"
 
-        print(f"Attempting login for username: {full_username}, Branch: {branch}")
+        print(f"Attempting login for username: {full_username}, Branch: {branch},Branch: {branch}")
 
         try:
             connection = get_db_connection()
             cursor = connection.cursor(dictionary=True)
 
-            cursor.execute("SELECT * FROM pawnshopaccount WHERE username = %s", (full_username,))
+            cursor.execute("SELECT * FROM pawnshopaccount WHERE username = %s AND branch = %s", (full_username, branch))
             user = cursor.fetchone()
 
             print(f"Fetched user: {user}")
@@ -146,17 +170,18 @@ def login():
                         session['username'] = full_username
                         session['branch_id'] = user['branch_id']
                         session['branch'] = branch
+                        flash('Login successful!', 'success')
                         return redirect(url_for('home'))
                     else:
-                        flash('Incorrect password. Please try again.')
+                        flash('Incorrect password. Please try again.', 'danger')
                 else:
-                    flash('You must confirm your email before logging in.')
+                    flash('You must confirm your email before logging in.', 'warning')
             else:
-                flash('Username or branch is incorrect. Please try again.')
+                flash('Username or branch is incorrect. Please try again.', 'danger')
 
         except Error as e:
             print(f"Error during database operation: {e}")
-            flash('Database connection error. Please try again.')
+            flash('Database connection error. Please try again.', 'danger')
         finally:
             if cursor:
                 cursor.close()
@@ -164,6 +189,8 @@ def login():
                 connection.close()
 
     return render_template('loginform.html')
+
+
 
 @app.route('/customerinfo', methods=['GET', 'POST'])
 def customerinfo():
@@ -236,17 +263,36 @@ def submit():
 
     return redirect(url_for('home'))
  
+ # This is the Survey form where Username is display
 @app.route('/check_name', methods=['POST'])
 def check_name():
     data = request.get_json()
     name = data.get('name')
-    username = session['username']  # Get the current user's username
+    branch = session.get('branch')
+
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
 
     try:
-        # Modify the query to filter by username
-        cursor.execute("SELECT Age, Birthday, Customer_Work, Source_Income, Address, FirstTransaction FROM firsttrasaction WHERE Name = %s AND Username = %s", (name, username))
+        # Update the query to correctly select and alias the MIN(loanDate)
+        cursor.execute("""
+            SELECT 
+                Age, 
+                Birthday, 
+                Customer_Work, 
+                Source_Income, 
+                Address, 
+                MIN(loanDate) AS FirstTransaction 
+            FROM 
+                customerinfo 
+            WHERE 
+                Name = %s AND branch = %s 
+            GROUP BY 
+                Age, Birthday, Customer_Work, Source_Income, Address 
+            ORDER BY 
+                FirstTransaction ASC
+        """, (name, branch))
+
         customer = cursor.fetchone()
         if customer:
             return jsonify({
@@ -255,34 +301,42 @@ def check_name():
                 'occupation': customer['Customer_Work'],
                 'incomeSource': customer['Source_Income'],
                 'address': customer['Address'],
-                'firstTransaction':customer['FirstTransaction'],
+                'firstTransaction': customer['FirstTransaction'],
                 'customerType': 'existing'
             })
         else:
             return jsonify({})  # Return an empty JSON if not found
-    except Exception as e:
-        print("Database error:", e)
+    except mysql.connector.Error as err:
+        print("Database error:", err)
         return jsonify({"error": "Database error occurred"}), 500
     finally:
-        cursor.close()
-        connection.close()
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
+
+#Endd
+
+
+#Survey form existing name
 
 @app.route('/get_existing_names', methods=['GET'])
 def get_existing_names():
-   if 'username' not in session:  # Check if the user is logged in
+   if 'branch' not in session:  # Check if the user is logged in
         return jsonify({"names": []})  # Return an empty list if not logged in
    
-   username = session['username']  # Get the current user's username
-   names = fetch_names_from_database(username)  # Pass the username
+   branch = session['branch']  # Get the current user's username
+   names = fetch_names_from_database(branch)  # Pass the username
    return jsonify({"names": names})
-def fetch_names_from_database(username):
+
+def fetch_names_from_database(branch):
     names = []
     try:
         connection = get_db_connection()
         cursor = connection.cursor()
         
         # Modify the query to include a WHERE clause for the username
-        cursor.execute("SELECT Name FROM firsttrasaction WHERE Username = %s", (username,))
+        cursor.execute("SELECT DISTINCT Name FROM customerinfo WHERE branch = %s", (branch,))
         results = cursor.fetchall()
 
         for row in results:
@@ -298,27 +352,9 @@ def fetch_names_from_database(username):
 
     return names
 
+#enddd
 
-@app.route('/search_names', methods=['POST'])
-def search_names():
-    query = request.json.get('name', '').lower()
-    print(f"Searching for: {query}")  # Debug statement
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    try:
-        cursor.execute("SELECT Name, branch, Customer_work,address FROM Customerinfo WHERE LOWER(Name) LIKE %s", ('%' + query + '%',))
-        rows = cursor.fetchall()
-        suggestions = [{'name': row['Name'], 'branches': row['branch'], 'work': row['Customer_work'], 'addressed': row['address']} for row in rows]
-        print(f"Suggestions: {suggestions}")  # Debug statement
-    except Exception as e:
-        print(f"Error: {e}")  # Print any SQL error that occurs
-        suggestions = []
-
-    cursor.close()
-    conn.close()
-    return jsonify(suggestions)
-
+#FORM.HTML TABLE
 @app.route('/get_customer_info', methods=['POST'])
 def get_customer_info():
     name = request.json.get('name')
@@ -326,7 +362,7 @@ def get_customer_info():
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute("""
-            SELECT Name, Address, Customer_work, Branch
+            SELECT Name
             FROM Customerinfo 
             WHERE Name = %s
         """, (name,))
@@ -341,6 +377,8 @@ def get_customer_info():
     finally:
         cursor.close()
         conn.close()
+
+#FORM.HTML TABLE
 
 @app.route('/get_customer_transactions', methods=['POST'])
 def get_customer_transactions():
@@ -357,12 +395,15 @@ def get_customer_transactions():
     connection.close()
     return jsonify(transactions) if transactions else jsonify({"message": "No transactions found."})
 
+#fORM.HTML END
+
+#fORM.HTML SUGGESTIONSS
 @app.route('/get_global_names', methods=['GET'])
 def get_global_names():
     connection = get_db_connection()
     cursor = connection.cursor()
     try:
-        cursor.execute("SELECT Name, Branch FROM Customerinfo")
+        cursor.execute("SELECT Name FROM Customerinfo")
         results = cursor.fetchall()
         names = [row[0] for row in results]
         return jsonify({"names": names})
@@ -373,41 +414,28 @@ def get_global_names():
         cursor.close()
         connection.close()
 
+#fORM.HTML SUGGESTIONSS
 
-@app.route('/getinfo', methods=['POST'])
-def getinfo():
-    username = session.get('username')  # Assuming you are getting username from session
-    if username:
-        connection = get_db_connection()
-        cursor = connection.cursor(dictionary=True)
+#NOTHING TO DO WITHTHIS
+#@app.route('/get-customers', methods=['GET'])
+#def get_customers():
+ #   if 'username' not in session:
+#       return jsonify({"error": "Unauthorized"}), 401  # Handle unauthorized access
+#
+ #   username = session['username']  # Get the logged-in username
+ ##   branch = request.args.get('branch', '')
+  #  connection = get_db_connection()
+   # cursor = connection.cursor(dictionary=True)
+#
+ #   # Adjust the query to filter customers by the logged-in user
+  #  cursor.execute("SELECT name, address, branch,LoanDate,Age, Birthday,Customer_Work,Source_Income,Purpose,Amount,FirstTransaction,Status,comment FROM Customerinfo WHERE branch = %s", (username,))
+   # results = cursor.fetchall()
+    #cursor.close()
+    #connection.close()
 
-        # Fixed parameter passing
-        cursor.execute("SELECT * FROM customerinfo WHERE username = %s", (username,))
-        customer_info = cursor.fetchall()
-        cursor.close()
-        connection.close()
+#    return jsonify(results)  # Return the customer data as JSON
 
-        return jsonify(customer_info)  # Return the customer data as JSON
-    else:
-        return jsonify({"error": "User not logged in"}), 401  
-
-@app.route('/get-customers', methods=['GET'])
-def get_customers():
-    if 'username' not in session:
-        return jsonify({"error": "Unauthorized"}), 401  # Handle unauthorized access
-
-    username = session['username']  # Get the logged-in username
-
-    connection = get_db_connection()
-    cursor = connection.cursor(dictionary=True)
-
-    # Adjust the query to filter customers by the logged-in user
-    cursor.execute("SELECT name, address, branch,LoanDate,Age, Birthday,Customer_Work,Source_Income,Purpose,Amount,FirstTransaction,Status FROM Customerinfo WHERE username = %s", (username,))
-    results = cursor.fetchall()
-    cursor.close()
-    connection.close()
-
-    return jsonify(results)  # Return the customer data as JSON
+#THIS THE WAY TO REDIRECT TO SURVERY FORM THE "GO TO"
 @app.route('/surveyform')
 def surveyform():
     branch = request.args.get('branch', '')
@@ -418,23 +446,50 @@ def surveyform():
 
     return render_template('surveyform.html', branch=branch, customer_info=customer_info)
 
+
+#CUSTOMERINFO SEARCH FUNCTION
+
+def format_date_to_mmddyyyy(date_string):
+    # Converts YYYY-MM-DD to MM/DD/YYYY if date_string is not empty
+    return datetime.strptime(date_string, "%Y-%m-%d").strftime("%m/%d/%Y") if date_string else None
+
 @app.route('/search-customers', methods=['GET'])
 def search_customers():
     search_name = request.args.get('Searchcustomer', '')
     search_date = request.args.get('Searchdate', '')
+    branch = request.args.get('branch', '')
+    start_date = request.args.get('SearchdateStart')
+    end_date = request.args.get('SearchdateEnd')
+    
+    if search_date:
+        search_date = format_date_to_mmddyyyy(search_date)
+    if start_date and end_date:
+        start_date = format_date_to_mmddyyyy(start_date)
+        end_date = format_date_to_mmddyyyy(end_date)
+
 
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
 
-    # SQL query to search based on name and optionally by date
-    query = "SELECT name, branch, LoanDate, Age, Birthday, Address, Customer_Work, Source_Income, Purpose, Amount, FirstTransaction, Status, discover_by, created_at FROM Customerinfo WHERE name LIKE %s"
-    params = ['%' + search_name + '%']
-
+ 
+    query = "SELECT name, branch, LoanDate, Age, Birthday, Address, Customer_Work, Source_Income, Purpose, Amount, FirstTransaction, Status, discover_by, created_at, comment FROM Customerinfo WHERE 1=1"
+    params = []
+   
+    if search_name:
+        query += " AND name LIKE %s"
+        params.append(f"%{search_name}%")
     if search_date:
         query += " AND LoanDate = %s"
         params.append(search_date)
+    if start_date and end_date:
+        query += " AND LoanDate BETWEEN %s AND %s"
+        params.append(start_date)
+        params.append(end_date)
+    if branch:
+        query += " AND branch = %s"
+        params.append(branch)
 
-    cursor.execute(query, params)
+    cursor.execute(query, tuple(params))
     results = cursor.fetchall()
 
     cursor.close()
@@ -442,7 +497,10 @@ def search_customers():
 
     # Return the results as JSON
     return jsonify(results)  # Change to return jsonify
+
+#CUSTOMERINFO SEARCH FUNCTION
    
+   #sUGGESTION BOX IN CUSTOMERINFO
 @app.route('/suggest-customers', methods=['GET'])
 def suggest_customers():
     search_term = request.args.get('term', '')  # Get the search term from the query parameters
@@ -467,6 +525,54 @@ def get_customer_info(name):
     cursor.close()
     connection.close()
     return customer or {}
+
+ #sUGGESTION BOX IN CUSTOMERINFO
+
+
+#FEEDBACK CUSTOMERINFO
+@app.route('/')
+def index():
+    cursor = get_db_connection()
+    cursor.execute("SELECT id, name FROM branch")
+    branches = cursor.fetchall()
+    print("Branches fetched:", branches)  # Debugging line to confirm data
+    cursor.close()
+    return render_template('customerinfo.html', branches=branches) 
+
+
+@app.route('/submit-feedback', methods=['POST'])
+def submit_feedback():
+    data = request.json
+    customer_name = data['name']
+    feedback = data['feedback']
+
+    # Create a cursor
+    connection = get_db_connection()
+    cursor = connection.cursor()
+
+    # Update the customer's feedback
+    cursor.execute("UPDATE customerinfo SET comment = %s WHERE name = %s", (feedback, customer_name))
+
+    # Commit the transaction
+    connection.commit()
+    cursor.close()
+
+    return jsonify({'message': 'Feedback updated successfully'}), 200
+
+
+@app.route('/get-feedback', methods=['GET'])
+def get_feedback():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT * FROM customerinfo")
+    feedbacks = cursor.fetchall()
+    
+    cursor.close()
+    return jsonify(feedbacks), 200
+
+#FEEDBACK CUSTOMERINFO
+
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)

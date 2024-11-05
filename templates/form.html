@@ -3,50 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/style.css">
+    <link rel="stylesheet" href="../static/style.css" >
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Form</title>
-    
+</head>
+<body>
+   
+    <div class="header">
+        <h1 id="welcome">Welcome To Sun Gate Pawnshop, Inc.</h1>
+        <fieldset>
+            <p>User: {{ branch }}</p>
+      <button type="button" class="custo" onclick="showCustomerInformation()">Customer Information</button> 
+       
+      <button type="button" class="logout-btn" onclick="logout()"><i class="fas fa-out"></i> Log Out</button>
+    </fieldset>
+    </div>
+
+    <div class="content">
+
+        <div class="container">
+           <div class="Search">
+               <h2>Search Customer</h2>
+               <label id="search"><input type="text" id="searchInput" placeholder="Enter customer name" autocomplete="off"></label>
+               <div id="suggestionsBox1" class="autocomplete-suggestions hidden"></div>
+              <button type="button" id="goto" onclick="Surveyform()">Go To Survey form</button>
+              
+
+           </div>
+              <div id="transactionInfo">
+                <h3>Transaction History</h3>
+                <table id="branchTransactions" border="1">
+                    <thead>
+                        <tr>
+                            <th>Branch</th>
+                            <th>Loan Date</th>
+                            <th>Birthday</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Transaction rows will be added here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            </div>
+            </div>
+            
+    </div>
+</div>
+
+</body>
 
 <script>
-    const locations = [
-        "ARENA BLANCO", "AYALA", "BALIWASAN", "BALUNO", "BASILAN",
-        "BOALAN", "BOLONG", "BUNGUIAO", "BUSAY", "CABALUAY",
-        "CABATANGAN", "CALARIAN", "CAMINO NUEVO", "CAMPO ISLAM",
-        "CANELAR", "CAWIT", "CULIANAN", "CURUAN", "DIVISORIA",
-        "GOV. CAMINS", "GOV. LIM", "GOV. RAMOS", "GUISAO",
-        "GUIWAN", "SULU", "KASANYANGAN", "LA PAZ", "LABUAN",
-        "LAMISAHAN", "LANDANG GUA", "LANDANG LAUM", "LAPAKAN",
-        "LIMPAPA", "LUBIGAN", "LUMBANGAN", "LUNZURAN", "MAASIN",
-        "MALAGUTAY", "MAMPANG", "MANALIPA", "MANGUSU", "MANICAHAN",
-        "MARIKI", "MERCEDES", "NUÑEZ EXTENSION", "PAGADIAN CITY",
-        "PAMUCUTAN", "PASOBOLONG", "PASONANCA", "PATALON", "PUTIK",
-        "RECODO", "RIO HONDO", "SACOL ISLAND", "SALAAN",
-        "SAN JOSE CAWA-CAWA", "SAN JOSE GUSU", "SAN ROQUE-ZC",
-        "SANGALI", "SINUBONG", "SINUNUC", "STA. BARBARA",
-        "STA. CATALINA", "STA. MARIA", "STO. NIÑO", "TAGASILAY",
-        "TAGUITI", "TALABAAN", "TALISAYAN", "TALON-TALON",
-        "TALUKSANGAY", "TAWI-TAWI", "TETUAN", "TIGTABON",
-        "TUGBUNGAN", "TULUNGATUNG", "TUMAGA", "TUMATULAB",
-        "VETERANS AVENUE", "VICTORIA", "VITALI", "ZAMBOWOOD",
-        "ZAMBOANGA DEL NORTE", "ZONE 1", "ZONE 2", "ZONE 3",
-        "ZONE 4", "ABUNO", "ACMAC", "BAGONG SILANG", "BONBONON",
-        "BURU-UN", "DALIPUGA", "DEL CARMEN", "DITUCALAN",
-        "HINAPLANON", "KALILANGAN", "KIWALAN", "LUINAB",
-        "MA. CRISTINA", "MAHAYAHAY", "MARAWI CITY", "PALA-O",
-        "POBLACION", "PUGA-AN", "SAN MIGUEL", "SAN ROQUE-IC",
-        "SANTIAGO", "SARAY", "STA. ELENA", "STA. FILOMENA",
-        "STO. ROSARIO", "SUAREZ", "TAMBACAN", "TIBANGA",
-        "TIPANOY", "TOMAS CABILI", "TOMINOBO", "TUBOD",
-        "UBALDO LAYA", "UPPER HINAPLANON", "VILLA VERDE",
-        "LANAO DEL SUR", "LANAO DEL NORTE", "MIS. ORIENTAL",
-        "MIS. OCCIDENTAL", "ZAMBOANGA SIBUGAY", "CAGAYAN DE ORO CITY",
-        "ZAMBOANGA DEL SUR", "ROGONGON", "MANDULOG", "TAMBO",
-        "RONGONGON", "MUTI", "PANUBIGAN", "DIKILAAN",
-        "CACAO", "LANSONES", "KABACSANAN"
-    ];
+
 
     let existingNames = [];
     let globalNames = [];
+
+    //Autocomplete Function
         function autocomplete(input, suggestions, fetchDetails) {
             input.addEventListener("input", function() {
                 const value = this.value;
@@ -74,11 +88,14 @@
                 });
             });
         }
+
+             // Function to close all suggestion lists
             function closeAllLists() {
                 const items = document.querySelectorAll(".autocomplete-suggestions");
                 items.forEach(item => item.parentNode.removeChild(item));
             }
 
+            // Fetch customer details
     function fetchCustomerDetails(name) {
     fetch('/check_name', {
         method: 'POST',
@@ -126,8 +143,6 @@ function fetchCustomerInfo(name) {
     })
     .then(data => {
         if (data && Object.keys(data).length > 0) {
-            document.getElementById('work').value = data.Customer_work || '';
-            document.getElementById('addressed').value = data.Address || '';
             fetchCustomerTransactions(name);
         } else {
             clearFields();
@@ -210,28 +225,6 @@ function displayTransactions(transactions) {
             autocomplete(SearchInputcustomer, globalNames, fetchCustomerDetails);
         })
         .catch(error => console.error('Error fetching global names:', error));
-        
-        const anotherSearchInput = document.getElementById("name"); // Adjust this ID
-        autocomplete(anotherSearchInput, existingNames, fetchCustomerDetails); 
-
-        const SearchInputcustomer = document.getElementById("searchInput"); 
-        autocomplete(document.getElementById("address"), locations, fetchCustomerInfo);
-
-        const customerTypeRadios = document.querySelectorAll('input[name="customerType"]');
-        customerTypeRadios.forEach(radio => {
-        radio.addEventListener('change', handleCustomerTypeChange);
-    });
-    const today = new Date();
-    const minDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
-    document.getElementById('birthday').max = minDate.toISOString().split("T")[0];
-// Update the existing functions for loan and first transaction fields
-    document.getElementById('loan').addEventListener('change', function() {
-    syncDates('loan', 'firstTransaction'); // Sync Loan Date to First Transaction if applicable
-});
-
-    document.getElementById('firstTransaction').addEventListener('change', function() {
-    syncDates('firstTransaction', 'loan'); // Sync First Transaction to Loan Date if applicable
-});
 };
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
        
@@ -292,54 +285,7 @@ function displayTransactions(transactions) {
     }
 }
 
-    </script>
-    
-</head>
-<body>
-   
-    <div class="header">
-        <h1 id="welcome">Welcome To Sun Gate Pawnshop!</h1>
-        <fieldset>  <!-- Display the logged-in username -->
-     <button type="button" onclick="showCustomerInformation()">Customer Information</button> 
-     <fieldset id="fieldset1"> <button type="button" class="logout-btn" onclick="logout()">Logout</button></fieldset> 
-    </fieldset>
-    </div>
-
-    <div class="content">
-        <div class="container">
-           <div class="Search">
-            <p>User: {{ branch }}</p>
-               <h2>Search Customer</h2>
-               <label id="search">Search <input type="text" id="searchInput" placeholder="Enter customer name" autocomplete="off"></label>
-               <div id="suggestionsBox1" class="autocomplete-suggestions hidden"></div>
-              <label id="Occupation1">Occupation <input type="text" id="work" readonly autocomplete="off"></label>
-              <label id="address1">Address <input type="text" id="addressed" readonly autocomplete="off"></label>
-             <button type="button" id="goto" onclick="Surveyform()">Go To</button>
-              <div id="transactionInfo">
-                <h3>Transaction History</h3>
-                <table id="branchTransactions" border="1">
-                    <thead>
-                        <tr>
-                            <th>Branch</th>
-                            <th>Loan Date</th>
-                            <th>Birthday</th>
-                            <th>Purpose</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Transaction rows will be added here dynamically -->
-                    </tbody>
-                </table>
-            </div>
-            </div>
-            </div>
-            
-    </div>
-</div>
-</div>
-     
-        <script>
-            function logout() {
+function logout() {
                 // Make a POST request to logout
                 fetch('/submit', {
                     method: 'POST',
@@ -364,14 +310,13 @@ function displayTransactions(transactions) {
             }
 
             function Surveyform() {
-                const customerInfo = {
-                    name: document.getElementById('searchInput').value
-                }
-                localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
-                const branch ="{{ branch}}";
-    window.location.href = `/surveyform?branch=${encodeURIComponent(branch)}`;
+            const customerName = document.getElementById('searchInput').value;
+            localStorage.setItem('customerInfo', JSON.stringify({ name: customerName }));
+    
+    // Redirect to the survey form, including the branch and customer name in the query string
+            const branch = "{{ branch }}";
+            window.location.href = `/surveyform?branch=${encodeURIComponent(branch)}&customerName=${encodeURIComponent(customerName)}`;
 }
-
 
     function showForm(formId) {
         // Hide all forms
@@ -381,6 +326,8 @@ function displayTransactions(transactions) {
         // Show the selected form
         document.getElementById(formId).style.display = 'block';
     }
-</script>
-</body>
+    </script>
+    
+     
+
 </html>

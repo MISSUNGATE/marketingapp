@@ -1,0 +1,160 @@
+h1
+{
+    text-align: center;
+    color:#0033cc;
+    font-size: 50px;
+
+}
+#label{
+display: block;
+margin: 2px;
+color: #0033cc;
+font-weight:900 ;
+
+}
+#SearchdateStart, #SearchdateEnd, #Searchcustomer,#branch{
+margin: 5px;
+padding: 5px;
+border-radius: 10px;
+}
+
+.search-section{
+padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(2, 2, 2, 0.1);
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+
+}
+.searcher{
+    margin:auto;
+    background: url(sungate.jpg);
+    background-repeat: no-repeat;
+    background-size: 200px 200px;
+ 
+  
+}
+.branch-customer{
+    display: flex;
+
+  
+}
+button[
+type="submit"]{
+    background-color: #003366;
+    color: #fff;
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 1rem;
+    width: 100%;
+    max-width: 200px;
+}
+
+
+.customer-container{
+    margin-top: 20px;
+    overflow-x: auto;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+th, td {
+    border: 1px solid #0033cc;
+    padding: 8px;
+    text-align: left;
+    color: #0033cc;
+}
+thead{
+    background-color: steelblue;
+    border: 2px solid white;
+    height: 70px;
+    font-size: 15px;
+    color: white;
+}
+th{
+    background-color: #003366;
+    color: #ffffff;
+    font-weight: bold;
+}
+h2{
+    font-size: 40px;
+}
+tr{
+    border: none;
+    border-bottom: 2px solid steelblue;
+}
+td{
+    border: none;
+    font-size: 0.9rem;
+}
+    .suggestions {
+    border: 1px solid #ccc;
+    background-color: #fff;
+    position: absolute;
+    max-height: 200px;
+    overflow-y: auto;
+    width: 200px;
+    z-index: 10;
+}
+.suggestion-item {
+    padding: 8px;
+    cursor: pointer;
+}
+.suggestion-item:hover {
+    background-color: #f0f0f0;
+}
+body{
+    background-color:  #FFD708;
+}
+tfoot{
+    padding: 15px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    background-color: #f8f9fa;
+    text-align: right;
+}
+@media (max-width: 768px) {
+    th, td {
+        padding: 10px;
+        font-size: 0.8rem;
+    }
+
+    .searcher {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 576px) {
+    .table {
+        display: block;
+    }
+
+    th, td {
+        display: block;
+        width: 100%;
+        text-align: right;
+    }
+
+    th {
+        text-align: left;
+        background-color: #e0e0e0;
+    }
+
+    td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        float: left;
+        color: #333;
+    }
+
+    footer {
+        text-align: left;
+    }
+}

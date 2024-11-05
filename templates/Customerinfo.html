@@ -5,66 +5,80 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Retrieve Customers</title>
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
-        h1
+      
+      *{
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }  
+      body{
+        margin: 0;
+        padding: 0;
+      }
+      h1
         {
-            text-align: center;
-            color:#0033cc;
+            color:#FFD700;
             font-size: 50px;
         }
-        form{
-            width: 100%;
-    display: flex;
-    flex-direction: column;
+        #label{
+        display: block;
+        margin: 2px;
+        color: #FFD700;
+        font-weight:900 ;
 
-        }
-     #Searchdate{
-        margin: 1em auto;
+     }
+     #SearchdateStart, #SearchdateEnd, #Searchcustomer,#branch{
+        margin: 5px;
         padding: 5px;
         border-radius: 10px;
      }
-     #Searchcustomer{
-        margin: 1em auto;
-        padding: 10px;
-        border-radius: 10px;
-        border-bottom: 3px solid #0033cc;
-      
-     }
-     #label{
-        display: block;
-        margin: 2px;
 
-     }
-     button[
+
+        .searcher{
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            border-bottom: 5px solid steelblue;
+            background-color: #002366;
+            
+          
+ 
+ 
+        }
+        .branch-customer{
+            display: flex;
+        }
+        button[
         type="submit"]{
-        width: 20%;
+        width: 8%;
         text-align: center;
         padding: 10px;
-        background-color: #0033cc;
+        background-color: #558010;
         border-radius: 10px;
-        color: #fff;
+        color: white;
+        position: absolute;
+        top: 26%;
+        left:355px;
 
      }
-        .customer-container{
-    width: 100%;
-    margin-top: 5px;
-    border-collapse: collapse;
-    display: flex;
-    flex-direction: column;
-    font-size: 12px;
-    text-align: center;
-    color:blue;
-}
+  
 table {
             width: 100%;
             border-collapse: collapse;
-            background-color: #f0f0f0;
-            border-radius: 50px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
         th, td {
             border: 1px solid #0033cc;
             padding: 8px;
-            text-align: center;
+            text-align: left;
             color: #0033cc;
         }
         thead{
@@ -75,8 +89,9 @@ table {
             color: white;
         }
         th{
-            color: white;
-            border: white;
+            background-color: #003366;
+            color: #ffffff;
+            font-weight: bold;
         }
         h2{
             font-size: 40px;
@@ -87,6 +102,7 @@ table {
         }
         td{
             border: none;
+            font-size: 0.9rem;
         }
             .suggestions {
             border: 1px solid #ccc;
@@ -95,6 +111,7 @@ table {
             max-height: 200px;
             overflow-y: auto;
             width: 200px;
+            z-index: 10;
         }
         .suggestion-item {
             padding: 8px;
@@ -103,23 +120,131 @@ table {
         .suggestion-item:hover {
             background-color: #f0f0f0;
         }
-        body{
-            background-color:  #FFD700;
+       
+        tfoot{
+            padding: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            background-color: #f8f9fa;
+            text-align: right;
+        }
+
+        #home-button{
+            position: absolute;
+            padding: 10px;
+            right: 20px;
+            top:30px;
+             background-color:#558010 ; /* Company Blue */
+             color: #FFF;
+             border: none;
+             border-radius: 5px;
+             font-size: 1rem;
+               transition: background 0.3s ease;
+        }
+     
+        @media (max-width: 768px) {
+            th, td {
+                padding: 10px;
+                font-size: 0.8rem;
+            }
+
+            .searcher {
+                flex-direction: column;
+            }
+            button[
+        type="submit"]{
+        position: absolute;
+        top:33.5%;
+        left:330px;
+
+     }
+        }
+
+        @media (max-width: 576px) {
+            .table {
+                display: block;
+            }
+
+            th, td {
+                padding: 5px;
+                font-size: 0.8rem;
+            }
+
+            td::before {
+                content: attr(data-label);
+                font-weight: bold;
+                float: left;
+                color: #333;
+            }
+
+            footer {
+                text-align: left;
+            }
+
+            button[
+        type="submit"]{
+            width: 20%;
+        position: absolute;
+        top: 36%;
+        left:320px;
+
+     }
         }
     </style>
 </head>
 <body>
     <div class="searcher">
         <form action="/search-customers" method="GET" id="searchForm">
-            <h1>CUSTOMER INFOTMATION</h1>
-            <label for="Searchcustomer" id="label">Search by Name
-                <input type="text" name="Searchcustomer" id="Searchcustomer" placeholder="Seach Customer" onkeyup="fetchSuggestions()">
+            <h1>CUSTOMER INFORMATION</h1>
+            <DIV class="home-logout">
+                <button type="button" id="home-button" class="home">
+                    <i class="fas fa-home"></i>Home</button>
+            </DIV>
+            <div class="content">
+            <div class="branch-customer">
+            <label for="Searchcustomer" id="label">Search by Name:
+            <input type="text" name="Searchcustomer" id="Searchcustomer" placeholder="Seach Customer" onkeyup="fetchSuggestions()">
             </label>
-            <label for="Searchdate" id="label">Search by Date
-                <input type="date" name="Searchdate" id="Searchdate">
-            </label>
-            <button type="submit">Search</button>
+        
+            
             <div id="suggestion-box" class="suggestions"></div>
+            <label for="SearchBranch" id="label">Branch
+                <select name="branch" id="branch" onchange="fetchByBranch()">
+                    <option value="">Select an option</option>
+                    <option>AL</option>
+                    <option>G1</option>
+                    <option>BAZ</option>
+                    <option>ME</option>
+                    <option>PS</option>
+                    <option>LP</option>
+                    <option>SM</option>
+                    <option>GL1</option>
+                    <option>GL2</option>
+                    <option>GL3</option>
+                    <option>GU</option>
+                    <option>SJ</option>
+                    <option>TU</option>
+                    <option>VE</option>
+                    <option>CA</option>
+                    <option>TC</option>
+                    <option>DV</option>
+                    <option>PA</option>
+                    <option>AA</option>
+                    <option>BA1</option>
+                    <option>MS</option>
+                </select>
+            </label>
+        </div>
+            <label for="SearchdateStart" id="label">Select Start Date:
+                <input type="date" name="SearchdateStart" id="SearchdateStart">
+            </label>
+
+            <label for="SearchdateEnd" id="label">Select End Date:
+                <input type="date" name="SearchdateEnd" id="SearchdateEnd">
+            </label>
+             <button type="submit"> Search  <i class="fas fa-search"> </i></button>
+            
+            </div>
         </form>
     </div>
     <div class="customer-container">
@@ -140,6 +265,8 @@ table {
                 <th>Status</th>
                 <th>discover_by</th>
                 <th>created_at</th>
+                <th>Feedback</th>
+                <th>Feedback</th>
             </tr>
         </thead>
         <tbody id="customer-list">
@@ -159,9 +286,20 @@ table {
                     <td>{{ customer.Status }}</td>
                     <td>{{ customer.discover_by }}</td>
                     <td>{{ customer.submitted_at }}</td>
+                    <td>{{ customer.feedback }}</td>
+                    <td><textarea placeholder="LEAVE a comment" class="feedback-input"></textarea>
+                    <button class="submit-feedback"></button>
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="9" style="text-align: right;"><strong>Total Amount:</strong></td>
+                <td id="total-amount">0</td>
+                <td colspan="6"></td>
+            </tr>
+        </tfoot>
         </table>
     </div>
 
@@ -182,7 +320,9 @@ table {
         function updateTable(data) {
             const customerList = document.getElementById('customer-list');
             customerList.innerHTML = ""; // Clear existing list
-    
+            
+            let totalAmount = 0;
+
             if (Array.isArray(data) && data.length > 0) {
                 data.forEach(customer => {
                     const row = document.createElement('tr');
@@ -201,22 +341,31 @@ table {
                         <td>${customer.Status}</td>
                         <td>${customer.discover_by}</td>
                         <td>${customer.created_at}</td>
+                        <td>${customer.comment ? customer.comment : 'No feedback'}</td>
+                         <td>
+                    <textarea placeholder="Leave a comment" class="feedback-input"></textarea>
+                    <button class="submit-feedback">Submit</button>
+                </td>
                     `;
+                   const amountValue = parseFloat(customer.Amount.replace(/[^0-9.-]+/g, "")) || 0;
+                   totalAmount += amountValue;
                     customerList.appendChild(row);
                 });
             } else {
-                customerList.innerHTML = "<tr><td colspan='14'>No customers found.</td></tr>";
+                customerList.innerHTML = "<tr><td colspan='16'>No customers found.</td></tr>";
             }
+            document.getElementById('total-amount').textContent = totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
     
         // Handle search submission
         document.getElementById('searchForm').onsubmit = function(event) {
             event.preventDefault(); // Prevent the default form submission
             const selectedCustomer = document.getElementById('Searchcustomer').value;
-            const selectedDate = document.getElementById('Searchdate').value;
-    
+             const selectedStartDate = document.getElementById('SearchdateStart').value;
+            const selectedEndDate = document.getElementById('SearchdateEnd').value;
+            const selectedBranch = document.getElementById('branch').value;
             // Fetch search results
-            fetch(`/search-customers?Searchcustomer=${encodeURIComponent(selectedCustomer)}&Searchdate=${encodeURIComponent(selectedDate)}`)
+            fetch(`/search-customers?Searchcustomer=${encodeURIComponent(selectedCustomer)}&SearchdateStart=${encodeURIComponent(selectedStartDate)}&SearchdateEnd=${encodeURIComponent(selectedEndDate)}&branch=${encodeURIComponent(selectedBranch)}`)
                 .then(response => response.json())
                 .then(data => {
                     updateTable(data); // Update the table with search results
@@ -227,6 +376,7 @@ table {
         }
     
         window.onload = getcustomers; // Load customers on page load
+        
     </script>
   <script>
     function fetchSuggestions() {
@@ -260,6 +410,78 @@ table {
             document.getElementById('suggestion-box').innerHTML = ''; // Clear suggestions if no search term
         }
     }
+
+    function fetchByBranch() {
+    const selectedBranch = document.getElementById('branch').value;
+
+    // Fetch records for the selected branch
+    fetch(`/search-customers?branch=${encodeURIComponent(selectedBranch)}`)
+        .then(response => response.json())
+        .then(data => {
+            updateTable(data); // Update the table with branch-specific records
+        })
+        .catch(error => {
+            console.error('Error fetching branch data:', error);
+        });
+}
+document.addEventListener('click', function(event) {
+    if (event.target.classList.contains('submit-feedback')) {
+        const feedbackInput = event.target.previousElementSibling; // Get the textarea
+        const feedback = feedbackInput.value;
+        const row = event.target.closest('tr'); // Get the closest row
+        const customerName = row.cells[0].textContent; // Assuming name is in the first cell
+
+        // Send feedback to the server
+        fetch('/submit-feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: customerName,
+                feedback: feedback,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Optionally handle success response (e.g., show a message)
+            console.log('Feedback submitted successfully:', data);
+        })
+        .catch(error => {
+            console.error('Error submitting feedback:', error);
+        });
+    }
+});
+
+function redirectToHome() {
+        window.location.href = '/'; // Change '/' to your actual home page URL if needed
+    }
+
+    // Adding event listeners to buttons
+    document.getElementById('home-button').addEventListener('click', redirectToHome);
+
+
+
+function formatDatetoMMDDYYYY(dateString) {
+    const date = new Date(dateString);
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${month}/${day}/${year}`;
+}
+
+const searchDate = formatDateToMMDDYYYY(selectedDate);
+const startDate = formatDateToMMDDYYYY(selectedStartDate);
+const endDate = formatDateToMMDDYYYY(selectedEndDate);
+
+function redirectToHome() {
+        window.location.href = '/'; // Change '/' to your actual home page URL if needed
+    }
+
+    // Adding event listeners to buttons
+    document.getElementById('home-button').addEventListener('click', redirectToHome);
+
+
 </script>
 </body>
 </html>

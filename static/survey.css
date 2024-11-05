@@ -1,5 +1,6 @@
 body{
-    background-color: #FFD700;;
+    background-color:#002366;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 h2{
@@ -19,18 +20,17 @@ form{
 
 }
 form h1{
-    color: blue;
-    font-family: 'Times New Roman', Times, serif;  
-    font-size: 30px;
+    color: #002366;
+    font-size: 3rem;
     text-align: center;
 }
 #Label{
-    color: #0033cc;
+    color: #002366;
     font-weight: bold;
     font-size: 1rem;
 }
  input[type="submit"]{
-    background-color: #0033cc;
+    background-color: #002366;
     color: white;
     border: none;
     padding: 10px 15px;
@@ -112,3 +112,28 @@ display: block;
     background: white;
     width: 30%;
 }
+
+
+    
+    @media (max-width: 576px) {
+        form{
+ 
+            width: 50%;
+             }
+     form h1{
+        font-size: 2.5rem;
+        color: #002366;
+     }
+    }
+    #home-button{
+        position: absolute;
+        padding: 10px;
+        right: 20px;
+        top:30px;
+         background-color:#558010 ; /* Company Blue */
+         color: #FFF;
+         border: none;
+         border-radius: 5px;
+         font-size: 1rem;
+           transition: background 0.3s ease;
+    }

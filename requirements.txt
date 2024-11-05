@@ -13,4 +13,6 @@ SQLAlchemy==2.0.35
 tkcalendar==1.6.1
 typing_extensions==4.12.2
 Werkzeug==3.0.4
-gunicorn
+gunicorn==23.0.0
+Flask-Mail
+

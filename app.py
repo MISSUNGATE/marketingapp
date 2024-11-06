@@ -8,6 +8,8 @@ from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+load_dotenv()
 app = Flask(__name__)
 app.secret_key = '1234567'
 # Configure Flask-Mail
@@ -23,14 +25,14 @@ mail = Mail(app)
 serializer = URLSafeTimedSerializer(app.secret_key)
 
 def get_db_connection():
-    
-    return mysql.connector.connect(
-        host="DESKTOP-8QUACIO",
-        user="MISADMIN",
-        port=3306,
-        password="misdepartment",
-        database="sungatecustomerdata"
+    connection = mysql.connector.connect(
+        host=os.getenv("DB_HOST"),        # The RDS endpoint
+        user=os.getenv("DB_USER"),        # The master username
+        password=os.getenv("DB_PASSWORD"),# The master password
+        database=os.getenv("DB_NAME"),    # The database name
+        port=3306                         # Default MySQL port
     )
+    return connection
 
 def validate_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
@@ -144,13 +146,14 @@ def confirm_email(token):
             connection.close()
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    cursor = None  # Initialize the cursor variable
     if request.method == 'POST':
         branch = request.form['branch']
         username = request.form['username']
         password = request.form['password']
         full_username = f"{username}"
 
-        print(f"Attempting login for username: {full_username}, Branch: {branch},Branch: {branch}")
+        print(f"Attempting login for username: {full_username}, Branch: {branch}")
 
         try:
             connection = get_db_connection()
@@ -163,7 +166,6 @@ def login():
 
             if user:
                 if user['is_confirmed'] == 1:  # Check as integer
-                    password = request.form['password']  # Get the password from the form
                     if check_password_hash(user['password'], password):  # Verify password
                         session['username'] = full_username
                         session['branch_id'] = user['branch_id']
@@ -185,7 +187,9 @@ def login():
                 cursor.close()
             if connection:
                 connection.close()
+
     return render_template('loginform.html')
+
 @app.route('/customerinfo', methods=['GET', 'POST'])
 def customerinfo():
     return render_template('customerinfo.html')
@@ -227,7 +231,7 @@ def submit():
     if status == 'new customer':
         
         # Insert into Customerinfo table for new customers
-        cursor.execute("""INSERT INTO Customerinfo 
+        cursor.execute("""INSERT INTO customerinfo 
         (username, branch, name, LoanDate, age, birthday, address, customer_work, source_income, purpose, firsttransaction, amount, status, discover_by)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", 
         (username, branch, name, loan, age, birthday, address, occupation, income_source, purpose_of_transaction, transaction_date, amount, status, discover))
@@ -240,7 +244,7 @@ def submit():
 
     else:
         # Insert into Customerinfo for existing customers (adjust as needed)
-        cursor.execute("""INSERT INTO Customerinfo 
+        cursor.execute("""INSERT INTO customerinfo 
         (username, branch, name, LoanDate, age, birthday, address, customer_work, source_income, purpose, firsttransaction, amount, status, discover_by)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""", 
         (username, branch, name, loan, age, birthday, address, occupation, income_source, purpose_of_transaction, transaction_date, amount, status, discover))
@@ -346,7 +350,7 @@ def get_customer_info():
     try:
         cursor.execute("""
             SELECT Name
-            FROM Customerinfo 
+            FROM customerinfo 
             WHERE Name = %s
         """, (name,))
         customer = cursor.fetchone()
@@ -386,7 +390,7 @@ def get_global_names():
     connection = get_db_connection()
     cursor = connection.cursor()
     try:
-        cursor.execute("SELECT Name FROM Customerinfo")
+        cursor.execute("SELECT Name FROM customerinfo")
         results = cursor.fetchall()
         names = [row[0] for row in results]
         return jsonify({"names": names})
@@ -429,7 +433,7 @@ def search_customers():
     cursor = connection.cursor(dictionary=True)
 
  
-    query = "SELECT name, branch, LoanDate, Age, Birthday, Address, Customer_Work, Source_Income, Purpose, Amount, FirstTransaction, Status, discover_by, created_at, comment FROM Customerinfo WHERE 1=1"
+    query = "SELECT name, branch, LoanDate, Age, Birthday, Address, Customer_Work, Source_Income, Purpose, Amount, FirstTransaction, Status, discover_by, created_at, comment FROM customerinfo WHERE 1=1"
     params = []
    
     if search_name:
@@ -465,7 +469,7 @@ def suggest_customers():
     cursor = connection.cursor(dictionary=True)
     
     # Fetch customers whose names match the search term
-    query = "SELECT name FROM Customerinfo WHERE name LIKE %s LIMIT 10"
+    query = "SELECT name FROM customerinfo WHERE name LIKE %s LIMIT 10"
     cursor.execute(query, ('%' + search_term + '%',))
     results = cursor.fetchall()
     
@@ -477,7 +481,7 @@ def suggest_customers():
 def get_customer_info(name):
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
-    cursor.execute("SELECT * FROM Customerinfo WHERE Name = %s", (name,))
+    cursor.execute("SELECT * FROM customerinfo WHERE Name = %s", (name,))
     customer = cursor.fetchone()
     cursor.close()
     connection.close()

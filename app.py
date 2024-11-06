@@ -8,11 +8,8 @@ from itsdangerous import URLSafeTimedSerializer
 from werkzeug.security import check_password_hash
 from datetime import datetime
 import os
-from datetime import datetime
-from flask import Flask, flash, redirect, render_template, request, session, url_for
 app = Flask(__name__)
 app.secret_key = '1234567'
-
 # Configure Flask-Mail
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -26,9 +23,11 @@ mail = Mail(app)
 serializer = URLSafeTimedSerializer(app.secret_key)
 
 def get_db_connection():
+    
     return mysql.connector.connect(
         host="DESKTOP-8QUACIO",
         user="MISADMIN",
+        port=3306,
         password="misdepartment",
         database="sungatecustomerdata"
     )
@@ -123,7 +122,6 @@ def confirm_email(token):
         email = serializer.loads(token, salt='email-confirm', max_age=3600)  # Token expires after 1 hour
     except:
         return "The confirmation link is invalid or has expired."
-
     # Update the database to set the email as confirmed
     try:
         connection = get_db_connection()
@@ -187,15 +185,10 @@ def login():
                 cursor.close()
             if connection:
                 connection.close()
-
     return render_template('loginform.html')
-
-
-
 @app.route('/customerinfo', methods=['GET', 'POST'])
 def customerinfo():
     return render_template('customerinfo.html')
-
 @app.route('/')
 def home():
    if 'username' not in session:  # Check if user is logged in
@@ -203,17 +196,12 @@ def home():
    
    branch =  session.get('branch', '')   # Get branch from query parameters
    return render_template('form.html', branch=branch)  # Render the form if logged in
-
-
 @app.route('/submit', methods=['GET', 'POST'])
 def submit():
     action = request.form.get('action')
-    
-
     if action =='logout':
       session.pop('username', None)
       return redirect(url_for("login"))
-    
     username = session['username']
     branch = request.form['branch']
     name = request.form['name']
@@ -262,7 +250,6 @@ def submit():
     connection.close()
 
     return redirect(url_for('home'))
- 
  # This is the Survey form where Username is display
 @app.route('/check_name', methods=['POST'])
 def check_name():
@@ -316,10 +303,7 @@ def check_name():
             connection.close()
 
 #Endd
-
-
 #Survey form existing name
-
 @app.route('/get_existing_names', methods=['GET'])
 def get_existing_names():
    if 'branch' not in session:  # Check if the user is logged in
@@ -353,7 +337,6 @@ def fetch_names_from_database(branch):
     return names
 
 #enddd
-
 #FORM.HTML TABLE
 @app.route('/get_customer_info', methods=['POST'])
 def get_customer_info():
@@ -413,29 +396,6 @@ def get_global_names():
     finally:
         cursor.close()
         connection.close()
-
-#fORM.HTML SUGGESTIONSS
-
-#NOTHING TO DO WITHTHIS
-#@app.route('/get-customers', methods=['GET'])
-#def get_customers():
- #   if 'username' not in session:
-#       return jsonify({"error": "Unauthorized"}), 401  # Handle unauthorized access
-#
- #   username = session['username']  # Get the logged-in username
- ##   branch = request.args.get('branch', '')
-  #  connection = get_db_connection()
-   # cursor = connection.cursor(dictionary=True)
-#
- #   # Adjust the query to filter customers by the logged-in user
-  #  cursor.execute("SELECT name, address, branch,LoanDate,Age, Birthday,Customer_Work,Source_Income,Purpose,Amount,FirstTransaction,Status,comment FROM Customerinfo WHERE branch = %s", (username,))
-   # results = cursor.fetchall()
-    #cursor.close()
-    #connection.close()
-
-#    return jsonify(results)  # Return the customer data as JSON
-
-#THIS THE WAY TO REDIRECT TO SURVERY FORM THE "GO TO"
 @app.route('/surveyform')
 def surveyform():
     branch = request.args.get('branch', '')
@@ -445,10 +405,7 @@ def surveyform():
         customer_info = get_customer_info(name)  # Fetch customer info based on the name
 
     return render_template('surveyform.html', branch=branch, customer_info=customer_info)
-
-
 #CUSTOMERINFO SEARCH FUNCTION
-
 def format_date_to_mmddyyyy(date_string):
     # Converts YYYY-MM-DD to MM/DD/YYYY if date_string is not empty
     return datetime.strptime(date_string, "%Y-%m-%d").strftime("%m/%d/%Y") if date_string else None
